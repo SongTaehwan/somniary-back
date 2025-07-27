@@ -8,38 +8,59 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 import { Hono } from 'jsr:@hono/hono'
 import { cors } from 'jsr:@hono/hono/cors'
 
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+)
+
 const functionName = 'api'
 const app = new Hono().basePath(`/${functionName}`)
 
 app.use('*', cors())
-app.get('/hello', (c) => c.text('Hello from hono-server!'));
-app.post("auth/email", async (request) => {
-    try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
 
-    // TODO: Change the table_name to your table
-    const { data, error } = await supabase.from('profiles').select("*")
+app.post('/auth/signup', async (c) => {
+  const { email, password } = await c.req.json();
 
-    console.log(data, error)
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
 
-    if (error) {
-      throw error
-    }
-
-    return new Response(JSON.stringify({ data }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 200,
-    })
-  } catch (err) {
-    // @ts-ignore
-    return new Response(JSON.stringify({ message: err?.message ?? err }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 500 
-    })
+  if (error) {
+    return c.json({ error: error.message }, 400);
   }
+
+  return c.json({ message: 'Confirmation email sent.', data });
+});
+
+app.post('/auth/signin', async (c) => {
+  const { email, password } = await c.req.json();
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) return c.json({ error: error.message }, 401);
+
+  // 클라이언트에 access_token 전달
+  return c.json({
+    access_token: data.session?.access_token,
+    refresh_token: data.session?.refresh_token,
+    user: data.user,
+  });
+});
+
+app.get('/auth/user', async (c) => {
+  const authHeader = c.req.header('Authorization'); // Bearer <access_token>
+  if (!authHeader) return c.json({ error: 'No token provided' }, 401);
+
+  const token = authHeader.split(' ')[1];
+
+  const { data: user, error } = await supabase.auth.getUser(token);
+  if (error) return c.json({ error: error.message }, 401);
+
+  return c.json({ user });
 });
 
 Deno.serve(app.fetch)
