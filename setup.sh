@@ -11,5 +11,8 @@ $SCRIPT_DIR/scripts/install_mise.sh
 ### 2. postgres 설치
 ./scripts/install_postgres_from_mise.sh
 
+### 3. supabase 설치
+brew install supabase
+
 ### 환경 구축 관련 내용 추가
 ### TODO: 추후 Docker 이미지로 만들 것
