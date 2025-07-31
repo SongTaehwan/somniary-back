@@ -110,3 +110,6 @@ docs/v2
 
 # sql
 *.sql
+
+supabase/.temp/
+supabase/.branches/
