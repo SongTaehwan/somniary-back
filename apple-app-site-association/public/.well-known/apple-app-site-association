@@ -1,0 +1,8 @@
+{
+  "applinks": {
+    "details": [{
+      "appID": "co.song.Somniary",
+      "paths": [ "/signup", "login" ]
+    }]
+  }
+}
