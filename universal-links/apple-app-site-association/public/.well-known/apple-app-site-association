@@ -1,0 +1,8 @@
+{
+  "applinks": {
+    "details": [{
+      "appID": "<ADD_TEAM_ID>.co.song.Somniary",
+      "paths": [ "/ul/*" ]
+    }]
+  }
+}

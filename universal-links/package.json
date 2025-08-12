@@ -1,0 +1,20 @@
+{
+  "name": "somniary-back",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SongTaehwan/somniary-back.git"
+  },
+  "author": "Song",
+  "description": "Somniary Backend",
+  "dependencies": {
+    "ua-parser-js": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0"
+  }
+}
