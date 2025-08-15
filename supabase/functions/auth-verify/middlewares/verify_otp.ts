@@ -1,25 +1,19 @@
 import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 
 import { HttpException } from "../../_shared/error/exception.ts";
-import {
-  InnerMiddleware,
-  Next,
-} from "../../_shared/middlewares/types.ts";
+import { InnerMiddleware, Next } from "../../_shared/middlewares/types.ts";
+
+import { AuthVerifyInput } from "../validators/validator.ts";
 import { FunctionState } from "../state/types.ts";
 import { State } from "../state/index.ts";
-import { AuthVerifyInput } from "../validators/validator.ts";
 
 // 브릿지: body에서 token_hash만 주입해 OTP 검증 수행 후 state에 세션 저장
 export const verifyOtp = (
   supabase: SupabaseClient
-): InnerMiddleware<AuthVerifyInput, FunctionState<AuthVerifyInput>> => {
-  return async (
-    { token_hash },
-    ctx,
-    next: Next
-  ) => {
+): InnerMiddleware<string, AuthVerifyInput, FunctionState<AuthVerifyInput>> => {
+  return async (tokenHash, ctx, next: Next) => {
     const { data, error } = await supabase.auth.verifyOtp({
-      token_hash,
+      token_hash: tokenHash,
       type: "magiclink",
     });
 

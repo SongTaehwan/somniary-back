@@ -4,7 +4,7 @@ import jwt from "npm:jsonwebtoken";
 
 import { methodGuard } from "../_shared/middlewares/method.guard.ts";
 import { parseInput } from "../_shared/middlewares/parse_input.ts";
-import { selectInputBody } from "../_shared/selectors/selectors.ts";
+import { CONTENT_TYPES } from "../_shared/error/constant.ts";
 import { compose } from "../_shared/utils/compose.ts";
 import { inject } from "../_shared/utils/inject.ts";
 
@@ -19,6 +19,7 @@ const SUPABASE_SERVICE_ROLE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+import { selectTokenHash } from "./selectors/selectors.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 // 1. 앱에서 POST 요청 시 device_id, token hash 를 받는다.
@@ -56,7 +57,7 @@ Deno.serve(
     [
       methodGuard(["POST"]),
       parseInput(validateInput),
-      inject(selectInputBody, verifyOtp(supabase)),
+      inject(selectTokenHash, verifyOtp(supabase)),
     ],
     (ctx) => {
       const { access_token, refresh_token } = State.getOtpData(ctx).session;
@@ -82,7 +83,7 @@ Deno.serve(
           refresh_token: refresh_token,
         }),
         {
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": CONTENT_TYPES.JSON },
         }
       );
     }
