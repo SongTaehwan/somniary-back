@@ -1,0 +1,19 @@
+{
+  "version": "5",
+  "specifiers": {
+    "npm:jwt@*": "0.2.0"
+  },
+  "npm": {
+    "jwt@0.2.0": {
+      "integrity": "sha512-+lsJgK3p+dr7yCHO19Ap2uFh+pMSCayPRGjWmf3kYCnYfO+1kqz4DqA8s65HKYIrw5c2NBo+dEvzoZUco09j4Q==",
+      "dependencies": [
+        "node-base64"
+      ],
+      "deprecated": true
+    },
+    "node-base64@0.0.1": {
+      "integrity": "sha512-lzWZQXvK7O1g5aKPCTYQJFGJc3MToEMlGmhXN+2UtkRYQz0OiWHoSMkfqQedUYCwWnixvsauH/IFsaFkrspjYQ==",
+      "scripts": true
+    }
+  }
+}
