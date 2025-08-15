@@ -1,10 +1,17 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient, EmailOtpType } from "jsr:@supabase/supabase-js@2";
-import { compose } from "../_shared/middlewares/compose.ts";
-import { methodGuard } from "../_shared/middlewares/method.guard.ts";
-import { Middleware } from "../_shared/middlewares/type.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 import jwt from "npm:jsonwebtoken";
-import { HttpException } from "../_shared/error/exception.ts";
+
+import { methodGuard } from "../_shared/middlewares/method.guard.ts";
+import { parseInput } from "../_shared/middlewares/parse_input.ts";
+import { selectInputBody } from "../_shared/selectors/selectors.ts";
+import { compose } from "../_shared/utils/compose.ts";
+import { inject } from "../_shared/utils/inject.ts";
+
+import { AuthVerifyInput, validateInput } from "./validators/validator.ts";
+import { verifyOtp } from "./middlewares/verify_otp.ts";
+import { FunctionState } from "./state/types.ts";
+import { State } from "./state/index.ts";
 
 const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -44,70 +51,40 @@ interface JwtClaims {
   ref?: string; // Only in anon/service role tokens
 }
 
-// 미들웨어: 요청 본문 파싱 및 OTP 검증 → 컨텍스트 전달
-const verifyOtp: Middleware = async (ctx, next) => {
-  const { token_hash } = await ctx.request.json();
-
-  // 2. 토큰 해시 검증 및 토큰 발급한다.
-  const { data, error } = await supabase.auth.verifyOtp({
-    token_hash: token_hash,
-    type: "magiclink",
-  });
-
-  if (error) {
-    ctx.response = HttpException.badRequest(error.message);
-    return;
-  }
-
-  if (!data.session) {
-    ctx.response = HttpException.unauthorized("session_not_found");
-    return;
-  }
-
-  ctx.state.otpData = data;
-  await next();
-};
-
 Deno.serve(
-  compose([
-    methodGuard(["POST"]),
-    verifyOtp,
-  ], (ctx) => {
-    const device_id = ctx.state.device_id as string;
-    const data = ctx.state.otpData as {
-      session: { access_token: string; refresh_token: string };
-    };
+  compose<AuthVerifyInput, FunctionState<AuthVerifyInput>>(
+    [
+      methodGuard(["POST"]),
+      parseInput(validateInput),
+      inject(selectInputBody, verifyOtp(supabase)),
+    ],
+    (ctx) => {
+      const { access_token, refresh_token } = State.getOtpData(ctx).session;
 
-    const {
-      session: { access_token, refresh_token },
-    } = data;
+      // 1) 기존 access_token 검증
+      const decoded = jwt.verify(
+        access_token,
+        JWT_SECRET, // 프로젝트 JWT 시크릿
+        { algorithms: ["HS256"] }
+      ) as JwtClaims;
 
-    // 1) 기존 access_token 검증
-    const decoded = jwt.verify(
-      access_token,
-      JWT_SECRET, // 프로젝트 JWT 시크릿
-      { algorithms: ["HS256"] }
-    ) as JwtClaims;
+      // 2) 기존 payload에 device_id 추가
+      const newPayload = { ...decoded };
 
-    // 2) 기존 payload에 device_id 추가
-    const newPayload = {
-      ...decoded,
-      device_id,
-    };
+      // 3) 새 토큰 발급 (유효기간은 기존과 동일하게 가져갈 수도 있고, 새로 설정 가능)
+      const newAccessToken = jwt.sign(newPayload, JWT_SECRET, {
+        algorithm: "HS256",
+      });
 
-    // 3) 새 토큰 발급 (유효기간은 기존과 동일하게 가져갈 수도 있고, 새로 설정 가능)
-    const newAccessToken = jwt.sign(newPayload, JWT_SECRET, {
-      algorithm: "HS256",
-    });
-
-    return new Response(
-      JSON.stringify({
-        access_token: newAccessToken,
-        refresh_token: refresh_token,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-  })
+      return new Response(
+        JSON.stringify({
+          access_token: newAccessToken,
+          refresh_token: refresh_token,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  )
 );
