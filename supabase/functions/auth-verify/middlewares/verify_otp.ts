@@ -27,11 +27,9 @@ export const verifyOtp = (
       return;
     }
 
-    State.setOtpData(ctx as never, {
-      session: {
-        access_token: data.session.access_token!,
-        refresh_token: data.session.refresh_token!,
-      },
+    State.setOtpData(ctx, {
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
     });
 
     next();
