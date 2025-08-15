@@ -5,7 +5,7 @@ import { methodGuard } from "../_shared/middlewares/method.guard.ts";
 import { parseInput } from "../_shared/middlewares/parse_input.ts";
 import { CONTENT_TYPES } from "../_shared/error/constant.ts";
 import { compose } from "../_shared/utils/compose.ts";
-import { inject } from "../_shared/utils/inject.ts";
+import { chain } from "../_shared/utils/inject.ts";
 
 import { AuthVerifyInput, validateInput } from "./validators/validator.ts";
 import { verifyOtp } from "./middlewares/verify_otp.ts";
@@ -27,8 +27,13 @@ Deno.serve(
     [
       methodGuard(["POST"]),
       parseInput(validateInput),
-      inject(selectTokenHash, verifyOtp(supabase)),
-      inject(selectDeviceIdWithTokens, issueJwtWithDeviceId),
+      chain<AuthVerifyInput, FunctionState<AuthVerifyInput>, string>((ctx) => selectTokenHash(ctx))
+        .then(verifyOtp(supabase))
+        .then((tokens, ctx) => State.setOtpData(ctx, tokens))
+        .reselect(selectDeviceIdWithTokens)
+        .then(issueJwtWithDeviceId)
+        .tap((auth, ctx) => State.setAuthData(ctx, auth))
+        .toMiddleware(),
     ],
     (ctx) => {
       const authData = State.getAuthData(ctx);

@@ -1,9 +1,8 @@
 import jwt from "npm:jsonwebtoken";
 
-import { InnerMiddleware } from "../../_shared/middlewares/types.ts";
+import { Step } from "../../_shared/utils/inject.ts";
 import { AuthVerifyInput } from "../validators/validator.ts";
-import { FunctionState } from "../state/types.ts";
-import { State } from "../state/index.ts";
+import { FunctionState, AuthTokens } from "../state/types.ts";
 
 interface JwtClaims {
   iss: string;
@@ -28,11 +27,12 @@ interface JwtClaims {
   ref?: string; // Only in anon/service role tokens
 }
 
-export const issueJwtWithDeviceId: InnerMiddleware<
+export const issueJwtWithDeviceId: Step<
   { device_id: string; access_token: string; refresh_token: string },
+  AuthTokens,
   AuthVerifyInput,
   FunctionState<AuthVerifyInput>
-> = ({ device_id, access_token, refresh_token }, ctx, next) => {
+> = ({ device_id, access_token, refresh_token }, _ctx) => {
   const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
 
   // 1) 기존 access_token 검증
@@ -52,10 +52,8 @@ export const issueJwtWithDeviceId: InnerMiddleware<
     }
   );
 
-  State.setAuthData(ctx, {
+  return {
     access_token: newAccessToken,
     refresh_token: refresh_token,
-  });
-
-  next();
+  }
 };
