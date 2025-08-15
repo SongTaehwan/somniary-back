@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
 import jwt from "npm:jsonwebtoken";
 
+import { supabase } from "../_shared/client.ts";
 import { methodGuard } from "../_shared/middlewares/method.guard.ts";
 import { parseInput } from "../_shared/middlewares/parse_input.ts";
 import { CONTENT_TYPES } from "../_shared/error/constant.ts";
@@ -12,13 +12,6 @@ import { AuthVerifyInput, validateInput } from "./validators/validator.ts";
 import { verifyOtp } from "./middlewares/verify_otp.ts";
 import { FunctionState } from "./state/types.ts";
 import { State } from "./state/index.ts";
-
-const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SUPABASE_SERVICE_ROLE_KEY =
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 import { selectTokenHash } from "./selectors/selectors.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
@@ -60,6 +53,7 @@ Deno.serve(
       inject(selectTokenHash, verifyOtp(supabase)),
     ],
     (ctx) => {
+      const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
       const { access_token, refresh_token } = State.getOtpData(ctx).session;
 
       // 1) 기존 access_token 검증
