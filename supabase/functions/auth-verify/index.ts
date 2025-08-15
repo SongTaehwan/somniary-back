@@ -1,7 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, EmailOtpType } from "jsr:@supabase/supabase-js@2";
-import { withMethodGuard } from "../_shared/middleware.ts";
+import { compose } from "../_shared/middlewares/compose.ts";
+import { methodGuard } from "../_shared/middlewares/method.guard.ts";
+import { Middleware } from "../_shared/middlewares/type.ts";
 import jwt from "npm:jsonwebtoken";
+import { HttpException } from "../_shared/error/exception.ts";
 
 const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -32,8 +35,8 @@ interface JwtClaims {
   is_anonymous: boolean;
   jti?: string;
   nbf?: number;
-  app_metadata?: Record<string, any>;
-  user_metadata?: Record<string, any>;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
   amr?: Array<{
     method: string;
     timestamp: number;
@@ -41,15 +44,39 @@ interface JwtClaims {
   ref?: string; // Only in anon/service role tokens
 }
 
-Deno.serve(
-  withMethodGuard(["POST"], async (req: Request) => {
-    // 1. 앱에서 POST 요청 시 device_id, token hash 를 받는다.
-    const { device_id, token_hash } = await req.json();
-    const data = await verifyOtp("magiclink", token_hash!);
+// 미들웨어: 요청 본문 파싱 및 OTP 검증 → 컨텍스트 전달
+const verifyOtp: Middleware = async (ctx, next) => {
+  const { token_hash } = await ctx.request.json();
 
-    if (!data.session) {
-      throw new Error("session not found");
-    }
+  // 2. 토큰 해시 검증 및 토큰 발급한다.
+  const { data, error } = await supabase.auth.verifyOtp({
+    token_hash: token_hash,
+    type: "magiclink",
+  });
+
+  if (error) {
+    ctx.response = HttpException.badRequest(error.message);
+    return;
+  }
+
+  if (!data.session) {
+    ctx.response = HttpException.unauthorized("session_not_found");
+    return;
+  }
+
+  ctx.state.otpData = data;
+  await next();
+};
+
+Deno.serve(
+  compose([
+    methodGuard(["POST"]),
+    verifyOtp,
+  ], (ctx) => {
+    const device_id = ctx.state.device_id as string;
+    const data = ctx.state.otpData as {
+      session: { access_token: string; refresh_token: string };
+    };
 
     const {
       session: { access_token, refresh_token },
@@ -73,13 +100,10 @@ Deno.serve(
       algorithm: "HS256",
     });
 
-    const result = await supabase.auth.getUser(newAccessToken);
-
     return new Response(
       JSON.stringify({
         access_token: newAccessToken,
         refresh_token: refresh_token,
-        result
       }),
       {
         headers: { "Content-Type": "application/json" },
@@ -87,17 +111,3 @@ Deno.serve(
     );
   })
 );
-
-async function verifyOtp(type: EmailOtpType, tokenHash: string) {
-  // 2. 토큰 해시 검증 및 토큰 발급한다.
-  const { data, error } = await supabase.auth.verifyOtp({
-    token_hash: tokenHash,
-    type,
-  });
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
