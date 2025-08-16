@@ -6,7 +6,7 @@ import { AuthVerifyInput } from "../validators/validator.ts";
 import { AuthTokens, FunctionState } from "../state/types.ts";
 import { Step } from "../../_shared/utils/inject.ts";
 
-// 브릿지: body에서 token_hash만 주입해 OTP 검증 수행 후 state에 세션 저장
+// OTP 검증 후 토큰 데이터 반환
 export const verifyOtp = (
   supabase: SupabaseClient
 ): Step<string, AuthTokens, AuthVerifyInput, FunctionState<AuthVerifyInput>> => {

@@ -27,7 +27,7 @@ interface JwtClaims {
   ref?: string; // Only in anon/service role tokens
 }
 
-export const issueJwtWithDeviceId: Step<
+export const resignJwtWithDeviceId: Step<
   { device_id: string; access_token: string; refresh_token: string },
   AuthTokens,
   AuthVerifyInput,
