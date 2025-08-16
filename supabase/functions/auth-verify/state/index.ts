@@ -2,7 +2,6 @@ import { Context } from "../../_modules/shared/middlewares/types.ts";
 import { State as BaseState } from "../../_modules/shared/state/index.ts";
 import {
   FunctionState,
-  KEY_OTP_DATA,
   KEY_AUTH_DATA,
   AuthTokens,
   SymbolKey,
@@ -28,8 +27,6 @@ function getData<D>(name: SymbolKey) {
 
 // TODO: Factory 함수로 변경
 export const State = Object.assign(BaseState, {
-  setOtpData: setData<AuthTokens>(KEY_OTP_DATA),
-  getOtpData: getData<AuthTokens>(KEY_OTP_DATA),
   setAuthData: setData<AuthTokens>(KEY_AUTH_DATA),
   getAuthData: getData<AuthTokens>(KEY_AUTH_DATA),
 });

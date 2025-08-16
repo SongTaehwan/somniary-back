@@ -1,9 +1,8 @@
 import { RouteState } from "../../_modules/shared/state/types.ts";
 
-export const KEY_OTP_DATA: unique symbol = Symbol("otp_data");
 export const KEY_AUTH_DATA: unique symbol = Symbol("auth_data");
 
-export type SymbolKey = typeof KEY_OTP_DATA | typeof KEY_AUTH_DATA;
+export type SymbolKey = typeof KEY_AUTH_DATA;
 
 export type AuthTokens = {
   access_token: string;
@@ -11,6 +10,5 @@ export type AuthTokens = {
 };
 
 export interface FunctionState<T> extends RouteState<T> {
-  [KEY_OTP_DATA]?: AuthTokens;
   [KEY_AUTH_DATA]?: AuthTokens;
 }
