@@ -10,7 +10,7 @@ import { AuthVerifyInput } from "./validators/validator.ts";
 
 // State
 import { FunctionState } from "./state/types.ts";
-import { State } from "./state/index.ts";
+import { selectAuthData } from "./selectors/selectors.ts";
 
 // Chains
 import { tokenResignChain } from "./chains/chains.ts";
@@ -20,7 +20,7 @@ Deno.serve(
   compose<AuthVerifyInput, FunctionState<AuthVerifyInput>>(
     [methodGuard(["POST"]), tokenResignChain.toMiddleware()],
     (ctx) => {
-      const { access_token, refresh_token } = State.getAuthData(ctx);
+      const { access_token, refresh_token } = selectAuthData(ctx);
 
       return new Response(
         JSON.stringify({
