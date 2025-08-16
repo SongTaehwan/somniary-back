@@ -1,11 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-import { supabase } from "../_shared/client.ts";
-import { methodGuard } from "../_shared/middlewares/method_guard.middleware.ts";
-import { parseInputStep } from "../_shared/steps/parse_input.step.ts";
-import { CONTENT_TYPES } from "../_shared/error/constant.ts";
-import { compose } from "../_shared/composer/compose.ts";
-import { chain } from "../_shared/composer/chain.ts";
+import { supabase } from "../_modules/shared/supabase.ts";
+import { methodGuard } from "../_modules/shared/middlewares/method_guard.middleware.ts";
+import { parseInputStep } from "../_modules/shared/steps/parse_input.step.ts";
+import { CONTENT_TYPES } from "../_modules/shared/error/constant.ts";
+import { compose } from "../_modules/shared/composer/compose.ts";
+import { chain } from "../_modules/shared/composer/chain.ts";
 
 import { AuthVerifyInput, validateInput } from "./validators/validator.ts";
 import { verifyOtp } from "./steps/verify_otp.step.ts";
@@ -13,7 +13,7 @@ import { FunctionState } from "./state/types.ts";
 
 import { resignJwtWithDeviceId } from "./steps/resign_jwt_with_device_id.step.ts";
 import { State } from "./state/index.ts";
-import { Input } from "../_shared/state/types.ts";
+import { Input } from "../_modules/shared/state/types.ts";
 import { selectTokenHash } from "./steps/select_token_hash.step.ts";
 import { storeInput } from "./steps/effects/store_input.effect.ts";
 import { selectDeviceIdWithTokens } from "./steps/select_device_id_with_tokens.step.ts";

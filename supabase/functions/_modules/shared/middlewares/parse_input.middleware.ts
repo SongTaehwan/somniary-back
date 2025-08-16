@@ -1,4 +1,5 @@
-import { Middleware, BodyParser } from "./types.ts";
+import { Middleware } from "./types.ts";
+import { BodyParser } from "../utils/parser.type.ts";
 import { State } from "../state/index.ts";
 import { HttpException } from "../error/exception.ts";
 import { RouteState } from "../state/types.ts";

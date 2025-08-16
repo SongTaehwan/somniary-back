@@ -1,6 +1,6 @@
 import jwt from "npm:jsonwebtoken";
 
-import { Step } from "../../_shared/composer/chain.ts";
+import { Step } from "../../_modules/shared/composer/chain.ts";
 import { AuthVerifyInput } from "../validators/validator.ts";
 import { FunctionState, AuthTokens } from "../state/types.ts";
 

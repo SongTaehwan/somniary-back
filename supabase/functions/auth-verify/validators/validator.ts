@@ -1,5 +1,5 @@
 import { z } from "npm:zod";
-import { BodyParser } from "../../_shared/middlewares/types.ts";
+import { BodyParser } from "../../_modules/shared/utils/parser.type.ts";
 
 const schema = z.object({
   device_id: z.string(),

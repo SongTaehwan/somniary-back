@@ -1,5 +1,5 @@
-import { Context } from "../../_shared/middlewares/types.ts";
-import { State as BaseState } from "../../_shared/state/index.ts";
+import { Context } from "../../_modules/shared/middlewares/types.ts";
+import { State as BaseState } from "../../_modules/shared/state/index.ts";
 import {
   FunctionState,
   KEY_OTP_DATA,

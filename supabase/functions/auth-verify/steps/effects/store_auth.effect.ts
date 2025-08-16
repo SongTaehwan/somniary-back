@@ -1,4 +1,4 @@
-import { SideEffect } from "../../../_shared/composer/chain.ts";
+import { SideEffect } from "../../../_modules/shared/composer/chain.ts";
 import { State } from "../../state/index.ts";
 import { AuthTokens, FunctionState } from "../../state/types.ts";
 import { AuthVerifyInput } from "../../validators/validator.ts";
