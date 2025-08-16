@@ -1,7 +1,7 @@
 import { Input, RouteState } from "../state/types.ts";
 import { HttpException } from "../error/exception.ts";
 import { FirstStep } from "../utils/inject.ts";
-import { Parser } from "./parse_input.middleware.ts";
+import { Parser } from "../middlewares/parse_input.middleware.ts";
 
 // Step 형태로 구현
 export const parseInputStep = <T, S extends RouteState<T>>(parser?: Parser<T>): FirstStep<Input<T>, T, S> => {

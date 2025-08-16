@@ -15,6 +15,9 @@ export type FirstStep<Out, Body, State extends RouteState<Body>> = (
   ctx: Context<Body, State>
 ) => Promise<Out> | Out;
 
+// 부수효과 타입
+export type SideEffect<Acc, Body, State extends RouteState<Body>> = (value: Acc, ctx: Context<Body, State>) => Promise<void> | void;
+
 // Fluent builder for arbitrary-length typed pipelines
 export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
   constructor(private readonly run: (ctx: Context<Body, State>) => Promise<Acc> | Acc) {}
@@ -25,7 +28,8 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
     return new ChainBuilder(first);
   }
 
-  // 다음 단계 추가하고 직전 단계의 아웃풋을 다음 단계의 인풋으로 전달한다.
+  // then: 직전 단계의 반환값(Acc)을 다음 단계의 입력으로 전달합니다.
+  // 예) 1단계 Out → 2단계 In, 2단계 Out → 3단계 In ... 으로 연쇄됩니다.
   then<Next>(nextStep: Step<Acc, Next, Body, State>): ChainBuilder<Body, State, Next> {
     return new ChainBuilder(async (ctx) => {
       const previousStep = await this.run(ctx);
@@ -33,13 +37,10 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
     });
   }
 
-  // 다음 단계를 추가하지만, 아웃풋을 그 다음 단계로 전달하지 않는다.
-  // 예) 1,2,3 단계가 있을 때,
-  // 1. 1단계의 아웃풋을 2단계의 인풋으로 전달한다.
-  // 2. 2단계의 아웃풋을 무시한다.
-  // 3. 3단계의 인풋으로 1단계의 아웃풋을 전달한다.
+  // tap: 직전 단계의 반환값을 변경하지 않고 부수효과만 수행합니다.
+  // 이후 단계의 입력은 여전히 이전 단계의 반환값(Acc)입니다.
   tap(
-    fn: (value: Acc, ctx: Context<Body, State>) => Promise<void> | void
+    fn: SideEffect<Acc, Body, State>
   ): ChainBuilder<Body, State, Acc> {
     return new ChainBuilder(async (ctx) => {
       const value = await this.run(ctx);
@@ -48,7 +49,8 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
     });
   }
 
-  // 다음 단계를 추가하지만, 인풋을 인자로 받지 않는다.
+  // reselect: 직전 단계의 반환값을 무시하고, 컨텍스트에서 새 값을 선택해 다음 단계의 입력으로 전달합니다.
+  // 직전 Out 무시, 컨텍스트에서 새 값 선택해 다음 In
   reselect<Next>(selector: Selector<Next, Body, State>): ChainBuilder<Body, State, Next> {
     return new ChainBuilder(async (ctx) => {
       await this.run(ctx);
