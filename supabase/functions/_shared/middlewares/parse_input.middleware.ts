@@ -1,12 +1,10 @@
-import { Middleware } from "./types.ts";
+import { Middleware, BodyParser } from "./types.ts";
 import { State } from "../state/index.ts";
 import { HttpException } from "../error/exception.ts";
 import { RouteState } from "../state/types.ts";
 
-export type Parser<T> = (raw: unknown) => T | Promise<T>;
-
 // middleware 형태로 구현
-export const parseInputMiddleware = <T, S extends RouteState<T>>(parser?: Parser<T>): Middleware<T, S> => {
+export const parseInputMiddleware = <T, S extends RouteState<T>>(parser?: BodyParser<T>): Middleware<T, S> => {
   return async (ctx, next) => {
     // 쿼리스트링
     const url = new URL(ctx.request.url);

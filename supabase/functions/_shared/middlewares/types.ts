@@ -26,3 +26,6 @@ export type FinalHandler<T, S extends RouteState<T>> = (
 
 // Handler 는 직접 Response 를 반환하는 타입이다.
 export type Handler = (request: Request) => Response | Promise<Response>;
+
+// 바디 파싱 함수 타입
+export type BodyParser<T> = (raw: unknown) => T | Promise<T>;

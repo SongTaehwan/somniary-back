@@ -1,4 +1,5 @@
 import { z } from "npm:zod";
+import { BodyParser } from "../../_shared/middlewares/types.ts";
 
 const schema = z.object({
   device_id: z.string(),
@@ -7,7 +8,7 @@ const schema = z.object({
 
 export type AuthVerifyInput = z.infer<typeof schema>;
 
-export const validateInput = async (data: unknown): Promise<AuthVerifyInput> => {
+export const validateInput: BodyParser<AuthVerifyInput> = async (data) => {
   const result = await schema.safeParseAsync(data);
 
   if (!result.success) {
