@@ -1,6 +1,6 @@
 import { Input, RouteState } from "../state/types.ts";
 import { HttpException } from "../error/exception.ts";
-import { FirstStep } from "../utils/inject.ts";
+import { FirstStep } from "../composer/chain.ts";
 import { BodyParser } from "../middlewares/types.ts";
 
 // Step 형태로 구현

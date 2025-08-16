@@ -1,4 +1,4 @@
-import { Step } from "../../_shared/utils/inject.ts";
+import { Step } from "../../_shared/composer/chain.ts";
 import { AuthVerifyInput } from "../validators/validator.ts";
 import { FunctionState } from "../state/types.ts";
 import { Input } from "../../_shared/state/types.ts";

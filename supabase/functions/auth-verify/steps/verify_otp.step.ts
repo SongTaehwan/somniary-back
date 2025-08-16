@@ -1,10 +1,9 @@
 import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 
 import { HttpException } from "../../_shared/error/exception.ts";
-
 import { AuthVerifyInput } from "../validators/validator.ts";
 import { AuthTokens, FunctionState } from "../state/types.ts";
-import { Step } from "../../_shared/utils/inject.ts";
+import { Step } from "../../_shared/composer/chain.ts";
 
 // OTP 검증 후 토큰 데이터 반환
 export const verifyOtp = (
@@ -24,7 +23,7 @@ export const verifyOtp = (
 
     if (!data.session) {
       // 클라이언트 응답 + 프로세스 중단
-      ctx.response = HttpException.unauthorized("session_not_found");
+      ctx.response = HttpException.internalError("session_not_found");
       throw new Error("session_not_found");
     }
 

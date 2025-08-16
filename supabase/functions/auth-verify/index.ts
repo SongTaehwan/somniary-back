@@ -4,8 +4,8 @@ import { supabase } from "../_shared/client.ts";
 import { methodGuard } from "../_shared/middlewares/method_guard.middleware.ts";
 import { parseInputStep } from "../_shared/steps/parse_input.step.ts";
 import { CONTENT_TYPES } from "../_shared/error/constant.ts";
-import { compose } from "../_shared/utils/compose.ts";
-import { chain } from "../_shared/utils/inject.ts";
+import { compose } from "../_shared/composer/compose.ts";
+import { chain } from "../_shared/composer/chain.ts";
 
 import { AuthVerifyInput, validateInput } from "./validators/validator.ts";
 import { verifyOtp } from "./steps/verify_otp.step.ts";
