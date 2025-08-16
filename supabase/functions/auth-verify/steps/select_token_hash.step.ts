@@ -11,7 +11,7 @@ export const selectTokenHash: Step<
   FunctionState<AuthVerifyInput>
 > = (input, ctx) => {
   const tokenHash = input.body?.token_hash;
-  
+
   if (!tokenHash) {
     ctx.response = HttpException.badRequest("token_hash_not_found");
     throw new Error("token_hash_not_found");

@@ -55,5 +55,5 @@ export const resignJwtWithDeviceId: Step<
   return {
     access_token: newAccessToken,
     refresh_token: refresh_token,
-  }
+  };
 };

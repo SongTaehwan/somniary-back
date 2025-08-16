@@ -31,12 +31,11 @@ const requestInputParsingChain = chain<
 // 2. 토큰 해시 검증 및 토큰 발급한다.
 const authVerifyChain = requestInputParsingChain
   .then(selectTokenHash)
-  .then(verifyOtp(supabase))
+  .then(verifyOtp(supabase));
 
 // 3. device_sessions 레코드 추가
 // TODO: 레코드 추가
-const deviceSessionChain = authVerifyChain
-  .then(selectDeviceIdWithTokens)
+const deviceSessionChain = authVerifyChain.then(selectDeviceIdWithTokens);
 
 // 4. JWT claim 을 추가한다.
 // 5. 엑세스 토큰 & 리프레시 토큰 반환
@@ -46,10 +45,7 @@ const tokenResignChain = deviceSessionChain
 
 Deno.serve(
   compose<AuthVerifyInput, FunctionState<AuthVerifyInput>>(
-    [
-      methodGuard(["POST"]),
-      tokenResignChain.toMiddleware(),
-    ],
+    [methodGuard(["POST"]), tokenResignChain.toMiddleware()],
     (ctx) => {
       const authData = State.getAuthData(ctx);
 

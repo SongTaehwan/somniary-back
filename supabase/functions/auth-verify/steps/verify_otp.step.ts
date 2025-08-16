@@ -8,7 +8,12 @@ import { Step } from "../../_modules/shared/composer/chain.ts";
 // OTP 검증 후 토큰 데이터 반환
 export const verifyOtp = (
   supabase: SupabaseClient
-): Step<string, AuthTokens, AuthVerifyInput, FunctionState<AuthVerifyInput>> => {
+): Step<
+  string,
+  AuthTokens,
+  AuthVerifyInput,
+  FunctionState<AuthVerifyInput>
+> => {
   return async (tokenHash, ctx) => {
     const { data, error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,
@@ -30,6 +35,6 @@ export const verifyOtp = (
     return {
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
-    }
+    };
   };
 };

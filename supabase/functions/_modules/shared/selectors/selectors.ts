@@ -11,5 +11,5 @@ export const selectInputBody = <T, S extends RouteState<T>>(
     throw new Error("body_not_found");
   }
 
-  return input.body
+  return input.body;
 };
