@@ -19,19 +19,25 @@ export type FirstStep<Out, Body, State extends RouteState<Body>> = (
 export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
   constructor(private readonly run: (ctx: Context<Body, State>) => Promise<Acc> | Acc) {}
 
-  static start<Body, State extends RouteState<Body>, A>(
-    first: FirstStep<A, Body, State>
-  ): ChainBuilder<Body, State, A> {
-    return new ChainBuilder((ctx) => first(ctx));
+  static start<Body, State extends RouteState<Body>, Acc>(
+    first: FirstStep<Acc, Body, State>
+  ): ChainBuilder<Body, State, Acc> {
+    return new ChainBuilder(first);
   }
 
-  then<Next>(step: Step<Acc, Next, Body, State>): ChainBuilder<Body, State, Next> {
+  // 다음 단계 추가하고 직전 단계의 아웃풋을 다음 단계의 인풋으로 전달한다.
+  then<Next>(nextStep: Step<Acc, Next, Body, State>): ChainBuilder<Body, State, Next> {
     return new ChainBuilder(async (ctx) => {
-      const prev = await this.run(ctx);
-      return step(prev, ctx);
+      const previousStep = await this.run(ctx);
+      return nextStep(previousStep, ctx);
     });
   }
 
+  // 다음 단계를 추가하지만, 아웃풋을 그 다음 단계로 전달하지 않는다.
+  // 예) 1,2,3 단계가 있을 때,
+  // 1. 1단계의 아웃풋을 2단계의 인풋으로 전달한다.
+  // 2. 2단계의 아웃풋을 무시한다.
+  // 3. 3단계의 인풋으로 1단계의 아웃풋을 전달한다.
   tap(
     fn: (value: Acc, ctx: Context<Body, State>) => Promise<void> | void
   ): ChainBuilder<Body, State, Acc> {
@@ -42,10 +48,11 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
     });
   }
 
-  reselect<Next>(sel: Selector<Next, Body, State>): ChainBuilder<Body, State, Next> {
+  // 다음 단계를 추가하지만, 인풋을 인자로 받지 않는다.
+  reselect<Next>(selector: Selector<Next, Body, State>): ChainBuilder<Body, State, Next> {
     return new ChainBuilder(async (ctx) => {
       await this.run(ctx);
-      return sel(ctx);
+      return selector(ctx);
     });
   }
 
@@ -60,6 +67,13 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
             error instanceof Error ? error.message : "invalid_input"
           );
         }
+
+        console.error(
+          `[chain_to_middleware_error]: ${JSON.stringify(
+            error,
+            Object.getOwnPropertyNames(error)
+          )}`
+        );
       }
     };
   }

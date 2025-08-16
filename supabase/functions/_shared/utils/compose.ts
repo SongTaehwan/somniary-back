@@ -51,6 +51,13 @@ export function compose<T, S extends RouteState<T>>(
             error instanceof Error ? error.message : undefined
           );
         }
+
+        console.error(
+          `[compose_dispatch_error]: ${JSON.stringify(
+            error,
+            Object.getOwnPropertyNames(error)
+          )}`
+        );
       }
     };
 
@@ -63,6 +70,13 @@ export function compose<T, S extends RouteState<T>>(
     try {
       return await handler(ctx);
     } catch (error) {
+      console.error(
+        `[compose_handler_error]: ${JSON.stringify(
+          error,
+          Object.getOwnPropertyNames(error)
+        )}`
+      );
+
       return HttpException.internalError(
         error instanceof Error ? error.message : undefined
       );
