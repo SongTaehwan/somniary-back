@@ -1,85 +1,136 @@
 ## 아키텍처 개요
 
-### 객체 역할
+공용 모듈을 기반으로 도메인 기능을 체인(Fluent Builder)과 미들웨어로 합성해 `Edge Function` 을 구성합니다.
 
-- **State**: 요청 수명주기 동안 공유되는 컨텍스트 저장소
-  - 공통 입력: `/_shared/state/types.ts`, `/_shared/state/index.ts`
-    - `RouteState<Body>`에 `headers`, `query`, `body` 저장
-    - `State.setInput/getInput`로 접근
-  - 도메인 확장: `/auth-verify/state/types.ts`, `/auth-verify/state/index.ts`
-    - `FunctionState<T>`에 기능별 슬롯(예: `otp_data`, `auth_data`)
-    - `State.setOtpData/getOtpData`, `State.setAuthData/getAuthData`
+### 디렉토리 구조 개요
 
-- **Selector**: `State`에 대한 읽기 전용 접근자(검증·형변환 캡슐화)
-  - 공용: `/_shared/selectors/selectors.ts` → `selectInputBody<T>(ctx)`
-  - 도메인: `/auth-verify/selectors/selectors.ts` → `selectTokenHash(ctx)`, `selectDeviceIdWithTokens(ctx)`
-
-- **Step**: 체인에서 합성되는 순수(지향) 도메인 로직 유닛
-  - 타입: `Step<In, Out, Body, State>` (`/_shared/utils/inject.ts`)
-  - 예시:
-    - `parseInputStep(validate)`: 입력 파싱·검증 → `Input<T>` 산출
-    - `verifyOtp(supabase)`: `string → AuthTokens`
-    - `issueJwtWithDeviceId`: `{ device_id; access_token; refresh_token } → AuthTokens`
-
-- **Middleware**: `compose`로 실행되는 요청 처리 유닛(응답 설정 시 단락)
-  - 예시: `methodGuard(["POST"])`, `chain(...).toMiddleware()`
-
-- **Compose**: `/_shared/utils/compose.ts`
-  - 미들웨어 순차 실행, `ctx.response` 감지 시 즉시 반환
-  - 예외를 `HttpException.internalError`로 변환
-
-- **ChainBuilder (Fluent)**: `/_shared/utils/inject.ts`
-  - `chain(first).then(step).tap(sideEffect).reselect(selector).toMiddleware()`
-  - `then`: 이전 결과(Acc)를 다음 단계 인풋으로 안전 전달
-  - `tap`: 값 유지하며 부수효과 실행(예: 상태 저장). 인자 함수는 `Promise<void> | void` 시그니처만 허용되어 변환 불가(타입 안전)
-  - `reselect`: 이전 값 무시, 컨텍스트에서 새 값 선택
-
-- **Validator**: `/auth-verify/validators/validator.ts`
-  - `zod` 스키마 기반 검증, 반환 타입은 스키마에서 자동 추론
-
-- **Error**: `/_shared/error/exception.ts`, `/_shared/error/constant.ts`
-  - 일관된 JSON 에러 응답(`HttpException.badRequest/unauthorized/...`)
-  - 컴포저/체인에서 예외를 잡아 단락 처리
-
-### 요청 흐름 예시(`auth-verify`)
-
-```ts
-// 1) 메서드 가드
-methodGuard(["POST"]) // → 미들웨어
-
-// 2) 입력 검증 및 토큰 해시 추출(체인 1)
-chain<AuthVerifyInput, FunctionState<AuthVerifyInput>, Input<AuthVerifyInput>>(
-  parseInputStep(validateInput)
-)
-  .then(selectTokenHash)
-  .toMiddleware()
-
-// 3) OTP 검증 → 디바이스 바인딩 → 최종 토큰 발급(체인 2)
-chain<AuthVerifyInput, FunctionState<AuthVerifyInput>, string>((ctx) => selectTokenHash(ctx))
-  .then(verifyOtp(supabase))                        // string → AuthTokens
-  .then((tokens, ctx) => State.setOtpData(ctx, tokens)) // 부수효과 저장
-  .reselect(selectDeviceIdWithTokens)               // ctx → { device_id; access; refresh }
-  .then(issueJwtWithDeviceId)                       // → AuthTokens(재서명)
-  .tap((auth, ctx) => State.setAuthData(ctx, auth)) // 최종 저장
-  .toMiddleware()
-
-// 4) 핸들러: `State.getAuthData(ctx)`로 응답 생성
+```text
+supabase/functions/
+  _modules/                   # 공유 모듈
+    shared/
+      composer/               # 체인 빌더·컴포즈
+      middlewares/            # 요청 가드·입력 파싱
+      state/                  # 공통 입력 상태 헬퍼
+      selectors/              # 읽기 전용 셀렉터
+      steps/                  # 공용 스텝(예: 입력 파싱)
+      error/                  # 표준 에러 응답 포맷
+      utils/                  # 공용 타입/유틸리티
+  [edge_function_name]/       # 도메인 기능
+    chain/                    # 유즈케이스 체인 정의
+    steps/                    # 도메인 스텝 & 사이드 이펙트
+    state/                    # 도메인 상태 슬롯
+    validators/               # 입력 스키마 검증
 ```
 
 ### 설계 원칙
 
-- **입력 중앙화**: 파싱·검증은 앞단 스텝/미들웨어 한 곳에서 처리
+- **입력 중앙화**: 파싱, 검증은 앞단 스텝/미들웨어 한 곳에서 처리
 - **상태 캡슐화**: 쓰기는 헬퍼로 제한, 읽기는 셀렉터로만
-- **합성 우선**: 단계별 로직을 작은 `Step`으로 쪼개어 체인으로 합성
-- **단락 일관성**: 어디서든 `ctx.response` 설정 시 즉시 반환, 예외는 공통 포맷
+- **합성 우선**: 단계별 로직을 작은 `Step` 단위로 쪼개어 체인(Fluent Builder)으로 합성
+- **즉시 종료(Short-circuit) 일관성**: 어디서든 `ctx.response` 설정 시 즉시 반환, 예외는 공통 포맷
 
-### 사이드 이펙트 규칙 및 디렉토리 구조
+### 객체 역할
 
-- **Side Effect 타입 안전**
-  - `tap((value, ctx) => Promise<void> | void)` 형태만 허용되어, 값 변환 없이 부수효과만 수행
-  - 변환이 필요한 경우는 반드시 `then(step)`으로 구현하여 입력/출력 타입이 연결되도록 유지
+- **State**: Request 수명주기 동안 공유되는 컨텍스트 저장소
 
-- **디렉토리 구성 권장**
-  - 변환 스텝: `feature/steps/` (예: `verify_otp.step.ts`, `issue_jwt_with_device_id.ts`)
-  - 사이드 이펙트 스텝: `feature/steps/effects/` (예: `save_otp_data.effect.ts`, `log_auth_issued.effect.ts`)
-  - 체인에서 역할이 명확하도록 네이밍 가이드: 변환은 `*.step.ts`, 부수효과는 `*.effect.ts`
+  - Request Input(headers, query, body) 보관
+  - 도메인별 슬롯 제공(예: `auth_data`)
+  - 쓰기: State 헬퍼로만, 읽기: 셀렉터로만
+  - 도메인 확장 규칙: 기능별 `FunctionState<T>`에 unique symbol 슬롯을 정의하고, 해당 슬롯에 대한 `State.setXxx/getXxx` 헬퍼로만 쓰기를 허용
+
+- **Selector**: `State`에 대한 읽기 전용 접근자(검증·형변환 캡슐화)
+
+  - 실패 시 예외를 통해 즉시 종료(Short-circuit)
+  - 예: `selectInputBody`, 토큰 해시/디바이스 ID 선택
+
+- **Step**: 체인에서 합성되는 순수 도메인 로직 유닛
+
+  - 시그니처: `Step<In, Out, Body, State>`
+  - 예: `parseInputStep`, `verifyOtp`, `resignJwtWithDeviceId`
+
+- **Middleware**: `compose`로 실행되는 Request 처리 유닛(응답 설정 시 즉시 종료)
+
+  - 예: `methodGuard(["POST"])`, `chain(...).toMiddleware()`
+  - 입력 파싱은 Step 또는 Middleware 중 하나로 일관 적용
+  - 책임 분리: Middleware는 요청의 큰 흐름(예: 메서드 가드/인증/트랜잭션 경계)을 표현, 세부 도메인 변환은 Step이 담당
+
+- **Compose**
+
+  - 미들웨어 순차 실행, `ctx.response` 감지 시 즉시 반환
+  - 예외를 `HttpException.internalError`로 변환
+
+- **ChainBuilder (Fluent)**: 단계 합성을 선언적으로 표현하는 빌더. 긴 제네릭 함수 합성 대비 타입 전파 안정성과 에디터 성능(지연) 개선을 위해 적용
+
+  - then: Acc를 다음 단계 입력으로 전달(동기/비동기 지원)
+  - tap: 값을 유지한 채 부수효과만 수행
+  - reselect: 이전 값을 버리고 컨텍스트에서 새 값을 선택
+  - toMiddleware: 체인을 미들웨어로 변환해 compose에 연결
+
+- **Validator**: 입력값 구조/형식/제약 검증 담당(실패 시 즉시 종료)
+
+  - `zod` 스키마 기반 입력 검증
+  - zod 외 커스텀 파서도 동일 시그니처로 교체 가능
+
+- **Error**: `HttpException.*`로 표준 JSON 에러 응답 생성; compose/chain에서 예외 포착 시 응답이 없으면 적절한 에러로 변환하고, 설정된 응답이 있으면 즉시 종료(Short-circuit)(일관된 상태코드/메시지, `details` 지원)
+
+### 요청 흐름 예시(`auth-verify`)
+
+1. 메서드 가드: 허용되지 않은 메서드는 즉시 종료(Short-circuit)
+2. 입력 파싱·검증: 요청 바디를 구조화하고 유효성 검사 수행
+3. 선택: 컨텍스트에서 필요한 값 선택(예: 토큰 해시)
+4. 도메인 검증/처리: 외부 시스템과 상호작용 포함(예: OTP 검증)
+5. 재선택: 컨텍스트 기반으로 다음 단계 입력 구성(예: 디바이스 ID + 토큰)
+6. 변환: 도메인 결과 생성/변환(예: JWT 재서명)
+7. 사이드 이펙트: 결과 저장·로깅 등(값은 변경하지 않음)
+8. 최종 응답: 상태에서 결과를 읽어 응답 생성
+
+```mermaid
+graph TD
+	R{{"API 요청"}} --> |Edge function 호출| A
+
+	subgraph Composer
+		subgraph Fluent Builder
+			B["입력 파싱·검증"]
+			C["선택(토큰 해시)"]
+			D["도메인 검증/처리(OTP)"]
+			E["재선택(디바이스 ID + 토큰)"]
+			F["변환(JWT 재서명)"]
+			G["사이드 이펙트(저장/로깅)"]
+			I["응답 포멧 결정"]
+		end
+
+	  A["메서드 가드"] --> B
+	  B --> C
+	  C --> D
+	  D --> E
+	  E --> F
+	  F --> G
+	  G --> I
+	  I -->|200| H["최종 응답"]
+
+	  A -->|미허용 메서드| X["Method Not Allowed"] --> H
+	  B -->|유효성 실패| Y["Bad Request"] --> H
+	  D -->|도메인 오류| Z["4xx/50x"] --> H
+	  F -->|도메인 오류| Z --> H
+  end
+```
+
+### 구현 가이드
+
+- 입력 파싱 일관성
+
+  - Step(`parseInputStep`) 또는 Middleware 중 하나를 선택해 일관되게 적용
+
+- 사이드 이펙트 규칙
+
+  - `tap((value, ctx) => Promise<void> | void)`만 허용(값 변환 금지)
+  - 변환이 필요하면 반드시 `then(step)`으로 입력/출력 타입 체인을 유지
+
+- 네이밍 & 배치
+
+  - 변환: `*.step.ts`, 부수효과: `*.effect.ts`
+  - 체인 정의는 `feature/chains/`에 배치하여 유즈케이스를 한눈에 파악
+
+- 에러 처리 정책
+  - 도메인 오류 발생 시 필요한 경우 `ctx.response`를 설정해 즉시 종료(Short-circuit)
+  - 미처리 예외는 compose/chain에서 표준 에러 응답(`HttpException.*`)으로 변환
