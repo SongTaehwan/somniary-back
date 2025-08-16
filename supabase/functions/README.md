@@ -31,7 +31,7 @@
 - **ChainBuilder (Fluent)**: `/_shared/utils/inject.ts`
   - `chain(first).then(step).tap(sideEffect).reselect(selector).toMiddleware()`
   - `then`: 이전 결과(Acc)를 다음 단계 인풋으로 안전 전달
-  - `tap`: 값 유지하며 부수효과 실행(예: 상태 저장)
+  - `tap`: 값 유지하며 부수효과 실행(예: 상태 저장). 인자 함수는 `Promise<void> | void` 시그니처만 허용되어 변환 불가(타입 안전)
   - `reselect`: 이전 값 무시, 컨텍스트에서 새 값 선택
 
 - **Validator**: `/auth-verify/validators/validator.ts`
@@ -72,3 +72,14 @@ chain<AuthVerifyInput, FunctionState<AuthVerifyInput>, string>((ctx) => selectTo
 - **상태 캡슐화**: 쓰기는 헬퍼로 제한, 읽기는 셀렉터로만
 - **합성 우선**: 단계별 로직을 작은 `Step`으로 쪼개어 체인으로 합성
 - **단락 일관성**: 어디서든 `ctx.response` 설정 시 즉시 반환, 예외는 공통 포맷
+
+### 사이드 이펙트 규칙 및 디렉토리 구조
+
+- **Side Effect 타입 안전**
+  - `tap((value, ctx) => Promise<void> | void)` 형태만 허용되어, 값 변환 없이 부수효과만 수행
+  - 변환이 필요한 경우는 반드시 `then(step)`으로 구현하여 입력/출력 타입이 연결되도록 유지
+
+- **디렉토리 구성 권장**
+  - 변환 스텝: `feature/steps/` (예: `verify_otp.step.ts`, `issue_jwt_with_device_id.ts`)
+  - 사이드 이펙트 스텝: `feature/steps/effects/` (예: `save_otp_data.effect.ts`, `log_auth_issued.effect.ts`)
+  - 체인에서 역할이 명확하도록 네이밍 가이드: 변환은 `*.step.ts`, 부수효과는 `*.effect.ts`
