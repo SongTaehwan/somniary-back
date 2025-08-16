@@ -9,6 +9,7 @@ export type AuthTokens = {
   refresh_token: string;
 };
 
+// 함수 도메인 별로 공유될 상태를 정의한다.
 export interface FunctionState<T> extends RouteState<T> {
   [KEY_AUTH_DATA]?: AuthTokens;
 }
