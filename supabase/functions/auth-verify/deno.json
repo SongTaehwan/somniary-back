@@ -1,3 +1,8 @@
 {
-  "importMap": "../import_map.json"
+  "imports": {
+    "@types/jsonwebtoken": "npm:@types/jsonwebtoken",
+    "jsonwebtoken": "npm:jsonwebtoken",
+    "@shared/": "../_modules/shared/",
+    "@local/": "./"
+  }
 }

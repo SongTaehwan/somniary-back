@@ -8,7 +8,7 @@ import {
   KEY_AUTH_DATA,
   AuthTokens,
   SymbolKey,
-} from "./state.types.ts";
+} from "@local/state/state.types.ts";
 
 function setData<D>(name: SymbolKey) {
   return <T>(ctx: Context<T, FunctionState<T>>, data: D) => {

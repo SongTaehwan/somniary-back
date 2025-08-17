@@ -7,10 +7,10 @@ import { type JwtDependencies } from "@shared/security/jwt/jwt.ts";
 import { Step } from "@shared/core/chain.ts";
 
 // State
-import { FunctionState, AuthTokens } from "../../state/state.types.ts";
+import { FunctionState, AuthTokens } from "@local/state/state.types.ts";
 
 // Validator
-import { AuthVerifyInput } from "../../validators/validator.ts";
+import { AuthVerifyInput } from "@local/validators/validator.ts";
 
 interface JwtClaims extends JwtPayload {
   iss: string;

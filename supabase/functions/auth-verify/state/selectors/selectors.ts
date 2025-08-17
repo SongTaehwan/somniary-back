@@ -2,9 +2,9 @@
 import { Context } from "@shared/types/context.types.ts";
 
 // State
-import { AuthTokens, FunctionState } from "../state.types.ts";
-import { AuthVerifyInput } from "../../validators/validator.ts";
-import { State } from "../index.ts";
+import { AuthTokens, FunctionState } from "@local/state/state.types.ts";
+import { AuthVerifyInput } from "@local/validators/validator.ts";
+import { State } from "@local/state/index.ts";
 
 export const selectAuthData = (
   ctx: Context<AuthVerifyInput, FunctionState<AuthVerifyInput>>

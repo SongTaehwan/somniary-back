@@ -5,10 +5,10 @@ import { Step } from "@shared/core/chain.ts";
 import { HttpException } from "@shared/adapters/http/error/exception.ts";
 
 // State
-import { AuthTokens, FunctionState } from "../../state/state.types.ts";
+import { AuthTokens, FunctionState } from "@local/state/state.types.ts";
 
 // Validator
-import { AuthVerifyInput } from "../../validators/validator.ts";
+import { AuthVerifyInput } from "@local/validators/validator.ts";
 
 // OTP 검증 후 토큰 데이터 반환
 export const verifyOtp = (

@@ -6,14 +6,14 @@ import { CONTENT_TYPES } from "@shared/adapters/http/error/constant.ts";
 import { compose } from "@shared/core/compose.ts";
 
 // Validators
-import { AuthVerifyInput } from "./validators/validator.ts";
+import { AuthVerifyInput } from "@local/validators/validator.ts";
 
 // State
-import { FunctionState } from "./state/state.types.ts";
-import { selectAuthData } from "./state/selectors/selectors.ts";
+import { FunctionState } from "@local/state/state.types.ts";
+import { selectAuthData } from "@local/state/selectors/selectors.ts";
 
 // Chains
-import { tokenResignChain } from "./usecases/usecases.ts";
+import { tokenResignChain } from "@local/usecases/usecases.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 Deno.serve(

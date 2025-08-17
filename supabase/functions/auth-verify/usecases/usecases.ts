@@ -9,19 +9,19 @@ import { chain } from "@shared/core/chain.ts";
 import { Input } from "@shared/types/state.types.ts";
 
 // Steps
-import { verifyOtp } from "../steps/services/verify_otp.step.ts";
-import { resignJwtWithDeviceIdStep } from "../steps/services/resign_jwt_with_device_id.step.ts";
-import { storeInput } from "../steps/effects/store_input.effect.ts";
-import { storeAuth } from "../steps/effects/store_auth.effect.ts";
+import { verifyOtp } from "@local/steps/services/verify_otp.step.ts";
+import { resignJwtWithDeviceIdStep } from "@local/steps/services/resign_jwt_with_device_id.step.ts";
+import { storeInput } from "@local/steps/effects/store_input.effect.ts";
+import { storeAuth } from "@local/steps/effects/store_auth.effect.ts";
 
 // Domain
-import { selectTokenHash } from "../steps/rules/select_token_hash.step.ts";
-import { selectDeviceIdWithTokens } from "../steps/rules/select_device_id_with_tokens.step.ts";
+import { selectTokenHash } from "@local/steps/rules/select_token_hash.step.ts";
+import { selectDeviceIdWithTokens } from "@local/steps/rules/select_device_id_with_tokens.step.ts";
 
 // Validators
-import { AuthVerifyInput, validateInput } from "../validators/validator.ts";
-import { FunctionState } from "../state/state.types.ts";
-import { createJwtDependencies } from "../adapters/jwt/jwt.ts";
+import { AuthVerifyInput, validateInput } from "@local/validators/validator.ts";
+import { FunctionState } from "@local/state/state.types.ts";
+import { createJwtDependencies } from "@local/adapters/jwt/jwt.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 
