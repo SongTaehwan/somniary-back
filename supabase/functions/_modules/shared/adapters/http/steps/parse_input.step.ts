@@ -18,13 +18,13 @@ export const parseInputStep = <T, S extends RouteState<T>>(
 
     if (parser) {
       const parsingTask = await task<T>(
-        ctx.request.json(),
+        parser(ctx.request.json()),
         "parseInputStep_parse"
       );
 
       if (parsingTask.failed) {
         // 클라이언트 응답
-        ctx.response = HttpException.badRequest(parsingTask.error.message);
+        ctx.response = HttpException.badRequest("invalid payload");
         // 내부 로깅 및 추적
         throw parsingTask.error;
       }

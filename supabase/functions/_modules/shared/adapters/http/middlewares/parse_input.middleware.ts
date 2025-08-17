@@ -21,12 +21,12 @@ export const parseInputMiddleware = <T, S extends RouteState<T>>(
 
     if (parser) {
       const parsingTask = await task(
-        ctx.request.json(),
+        parser(ctx.request.json()),
         "parseInputMiddleware_parse"
       );
 
       if (parsingTask.failed) {
-        ctx.response = HttpException.badRequest("bad_request");
+        ctx.response = HttpException.badRequest("invalid payload");
         throw parsingTask.error;
       }
 
