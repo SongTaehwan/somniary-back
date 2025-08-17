@@ -1,10 +1,17 @@
-import jwt from "npm:jsonwebtoken";
+import { JwtPayload } from "npm:jsonwebtoken";
 
+// Shared
+import { HttpException } from "../../_modules/shared/error/exception.ts";
+import { JwtDependencies } from "../../_modules/shared/ports/jwt.ts";
 import { Step } from "../../_modules/shared/composer/chain.ts";
-import { AuthVerifyInput } from "../validators/validator.ts";
+
+// State
 import { FunctionState, AuthTokens } from "../state/types.ts";
 
-interface JwtClaims {
+// Validator
+import { AuthVerifyInput } from "../validators/validator.ts";
+
+interface JwtClaims extends JwtPayload {
   iss: string;
   aud: string | string[];
   exp: number;
@@ -27,33 +34,59 @@ interface JwtClaims {
   ref?: string; // Only in anon/service role tokens
 }
 
-export const resignJwtWithDeviceId: Step<
+export const resignJwtWithDeviceIdStep = (
+  dependencies: JwtDependencies<JwtClaims>
+): Step<
   { device_id: string; access_token: string; refresh_token: string },
   AuthTokens,
   AuthVerifyInput,
   FunctionState<AuthVerifyInput>
-> = ({ device_id, access_token, refresh_token }, _ctx) => {
-  const JWT_SECRET = Deno.env.get("JWT_SECRET") ?? "";
+> => {
+  const { verify, sign } = dependencies;
 
-  // 1) 기존 access_token 검증
-  const claims = jwt.verify(access_token, JWT_SECRET, {
-    algorithms: ["HS256"],
-  }) as JwtClaims;
+  return async ({ device_id, access_token, refresh_token }, ctx) => {
+    // 1) 기존 access_token 검증
+    let claims: JwtClaims;
 
-  // 2) 새 토큰 발급 (유효기간은 기존과 동일하게 가져갈 수도 있고, 새로 설정 가능)
-  const newAccessToken = jwt.sign(
-    {
-      ...claims,
-      device_id: device_id,
-    },
-    JWT_SECRET,
-    {
-      algorithm: "HS256",
+    try {
+      claims = await verify(access_token);
+    } catch (error) {
+      console.error(
+        `[resignJwtWithDeviceIdStep_verify_error]: ${JSON.stringify(
+          error,
+          Object.getOwnPropertyNames(error)
+        )}`
+      );
+
+      if (error instanceof Error) {
+        ctx.response = HttpException.badRequest("Invalid token");
+        throw Object.assign(error, { cause: "resignJwtWithDeviceIdStep" });
+      }
+
+      throw error;
     }
-  );
 
-  return {
-    access_token: newAccessToken,
-    refresh_token: refresh_token,
+    // 2) 새 토큰 발급 (유효기간은 기존과 동일하게 가져갈 수도 있고, 새로 설정 가능)
+    try {
+      const newAccessToken = await sign({ ...claims, device_id });
+
+      return {
+        access_token: newAccessToken,
+        refresh_token,
+      };
+    } catch (error) {
+      console.error(
+        `[resignJwtWithDeviceIdStep_sign_error]: ${JSON.stringify(
+          error,
+          Object.getOwnPropertyNames(error)
+        )}`
+      );
+
+      if (error instanceof Error) {
+        ctx.response = HttpException.internalError("Cannot sign token");
+      }
+
+      throw error;
+    }
   };
 };

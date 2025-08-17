@@ -12,7 +12,7 @@ import { Input } from "../../_modules/shared/state/types.ts";
 
 // Steps
 import { verifyOtp } from "../steps/verify_otp.step.ts";
-import { resignJwtWithDeviceId } from "../steps/resign_jwt_with_device_id.step.ts";
+import { resignJwtWithDeviceIdStep } from "../steps/resign_jwt_with_device_id.step.ts";
 import { selectTokenHash } from "../steps/select_token_hash.step.ts";
 import { storeInput } from "../steps/effects/store_input.effect.ts";
 import { selectDeviceIdWithTokens } from "../steps/select_device_id_with_tokens.step.ts";
@@ -21,6 +21,7 @@ import { storeAuth } from "../steps/effects/store_auth.effect.ts";
 // Validators
 import { AuthVerifyInput, validateInput } from "../validators/validator.ts";
 import { FunctionState } from "../state/types.ts";
+import { createJwtDependencies } from "./dependencies.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 
@@ -43,5 +44,9 @@ const deviceSessionChain = authVerifyChain.then(selectDeviceIdWithTokens);
 // 4. JWT claim 을 추가한다.
 // 5. 엑세스 토큰 & 리프레시 토큰 반환
 export const tokenResignChain = deviceSessionChain
-  .then(resignJwtWithDeviceId)
+  .then(
+    resignJwtWithDeviceIdStep(
+      createJwtDependencies(Deno.env.get("JWT_SECRET") ?? "")
+    )
+  )
   .tap(storeAuth);

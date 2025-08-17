@@ -1,3 +1,6 @@
 {
-  "imports": {}
+  "imports": {
+    "@types/jsonwebtoken": "npm:@types/jsonwebtoken",
+    "jsonwebtoken": "npm:jsonwebtoken"
+  }
 }

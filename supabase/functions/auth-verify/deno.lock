@@ -9,6 +9,7 @@
     "npm:@supabase/postgrest-js@1.19.4": "1.19.4",
     "npm:@supabase/realtime-js@2.11.15": "2.11.15_ws@8.18.3",
     "npm:@supabase/storage-js@2.7.1": "2.7.1",
+    "npm:@types/jsonwebtoken@*": "9.0.10",
     "npm:@types/node@*": "22.15.15",
     "npm:jsonwebtoken@*": "9.0.2",
     "npm:openai@^4.52.5": "4.104.0",
@@ -73,6 +74,16 @@
       "dependencies": [
         "@supabase/node-fetch"
       ]
+    },
+    "@types/jsonwebtoken@9.0.10": {
+      "integrity": "sha512-asx5hIG9Qmf/1oStypjanR7iKTv0gXQ1Ov/jfrX6kS/EO0OFni8orbmGCn0672NHR3kXHwpAwR+B368ZGN/2rA==",
+      "dependencies": [
+        "@types/ms",
+        "@types/node@22.15.15"
+      ]
+    },
+    "@types/ms@2.1.0": {
+      "integrity": "sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA=="
     },
     "@types/node-fetch@2.6.12": {
       "integrity": "sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==",
@@ -373,5 +384,11 @@
     "zod@4.0.10": {
       "integrity": "sha512-3vB+UU3/VmLL2lvwcY/4RV2i9z/YU0DTV/tDuYjrwmx5WeJ7hwy+rGEEx8glHp6Yxw7ibRbKSaIFBgReRPe5KA=="
     }
+  },
+  "workspace": {
+    "dependencies": [
+      "npm:@types/jsonwebtoken@*",
+      "npm:jsonwebtoken@*"
+    ]
   }
 }
