@@ -95,7 +95,7 @@ supabase/functions/
 
 - **Error**: `HttpException.*`로 표준 JSON 에러 응답 생성; compose/chain에서 예외 포착 시 응답이 없으면 적절한 에러로 변환하고, 설정된 응답이 있으면 즉시 종료(Short-circuit)(일관된 상태코드/메시지, `details` 지원)
 
-### 요청 흐름 예시(`auth-verify`)
+### 요청 흐름 예시(`signup`)
 
 1. 메서드 가드: 허용되지 않은 메서드는 즉시 종료(Short-circuit)
 2. 입력 파싱·검증: 요청 바디를 구조화하고 유효성 검사 수행
