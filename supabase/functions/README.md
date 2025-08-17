@@ -11,14 +11,15 @@ supabase/functions/
       composer/               # 체인 빌더·컴포즈
       middlewares/            # 요청 가드·입력 파싱
       state/                  # 공통 입력 상태 헬퍼
-      selectors/              # 읽기 전용 셀렉터
+        selectors/            # 읽기 전용 셀렉터
       steps/                  # 공용 스텝(예: 입력 파싱)
       error/                  # 표준 에러 응답 포맷
       utils/                  # 공용 타입/유틸리티
   [edge_function_name]/       # 도메인 기능
-    chain/                    # 유즈케이스 체인 정의
+    usecases/                    # 유즈케이스 체인 정의
     steps/                    # 도메인 스텝 & 사이드 이펙트
     state/                    # 도메인 상태 슬롯
+      selectors/              # 읽기 전용 셀렉터
     validators/               # 입력 스키마 검증
 ```
 
@@ -28,6 +29,13 @@ supabase/functions/
 - **상태 캡슐화**: 쓰기는 헬퍼로 제한, 읽기는 셀렉터로만
 - **합성 우선**: 단계별 로직을 작은 `Step` 단위로 쪼개어 체인(Fluent Builder)으로 합성
 - **즉시 종료(Short-circuit) 일관성**: 어디서든 `ctx.response` 설정 시 즉시 반환, 예외는 공통 포맷
+- **타입 안전한 합성**: `Step<In, Out, Body, State>` 제네릭으로 단계 간 타입 연결을 컴파일 타임에 보장. `tap`은 부수효과만 허용해 변환 오용 방지
+- **테스트 용이성**: Step/Selector는 순수 함수로 유지하고, 외부 의존성은 DI로 주입. Entry/Middleware는 얇게 유지해 단위 테스트 범위 명확화
+- **응답 일관성**: `HttpException.*`로 표준 에러 바디와 상태코드 통일. 오류 지점에서 즉시 종료하여 실패 경로를 단순화
+- **관찰 가능성**: 공통 컴포저에서 로깅/메트릭 훅을 확보. 요청 단위 상관관계 ID(header) 전파 권장
+- **확장 용이성**: 새 기능은 `validators/steps/effects/state/chains` 추가만으로 확장(Open-Closed). 네이밍 규약으로 역할 명확화
+- **경계 분리**: 교차 관심사(인증/레이트리밋/트랜잭션)는 Middleware, 도메인 변환은 Step에 배치
+- **실패 전략**: 외부 호출 Step에는 타임아웃/재시도/백오프 가이드를 적용하고, 필요 시 idempotency-key로 재실행 안전성 확보
 
 ### 객체 역할
 
