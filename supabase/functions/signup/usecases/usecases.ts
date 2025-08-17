@@ -1,5 +1,3 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
 // Shared
 import { supabase } from "@shared/infra/supabase.ts";
 import { parseInputStep } from "@shared/adapters/http/steps/parse_input.step.ts";

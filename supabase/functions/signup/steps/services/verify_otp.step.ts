@@ -1,4 +1,4 @@
-import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
+import { SupabaseClient } from "jsr:@supabase/supabase-js";
 
 // Shared
 import { Step } from "@shared/core/chain.ts";
