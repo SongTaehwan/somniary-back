@@ -1,16 +1,16 @@
 import { JwtPayload } from "npm:jsonwebtoken";
 
 // Shared
-import { task } from "../../_modules/shared/utils/task.ts";
-import { HttpException } from "../../_modules/shared/error/exception.ts";
-import { JwtDependencies } from "../../_modules/shared/ports/jwt.ts";
-import { Step } from "../../_modules/shared/composer/chain.ts";
+import { task } from "@shared/utils/task.ts";
+import { HttpException } from "@shared/http/error/exception.ts";
+import { type JwtDependencies } from "@shared/security/jwt/jwt.ts";
+import { Step } from "@shared/core/chain.ts";
 
 // State
-import { FunctionState, AuthTokens } from "../state/types.ts";
+import { FunctionState, AuthTokens } from "../../state/state.types.ts";
 
 // Validator
-import { AuthVerifyInput } from "../validators/validator.ts";
+import { AuthVerifyInput } from "../../validators/validator.ts";
 
 interface JwtClaims extends JwtPayload {
   iss: string;

@@ -1,13 +1,13 @@
-import { HttpException } from "../error/exception.ts";
-import { toError } from "../error/normalize.ts";
+import { HttpException } from "../adapters/http/error/exception.ts";
+import { toError } from "../adapters/http/error/normalize.ts";
 import {
-  Context,
   FinalHandler,
   Handler,
   Middleware,
   Next,
-} from "../middlewares/types.ts";
-import { RouteState } from "../state/types.ts";
+} from "../types/middleware.types.ts";
+import { type RouteState } from "../types/state.types.ts";
+import { type Context } from "../types/context.types.ts";
 
 // 미들웨어를 모두 호출 후 마지막 핸들러를 호출
 export function compose<T, S extends RouteState<T>>(

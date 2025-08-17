@@ -1,5 +1,7 @@
-import { Context } from "../middlewares/types.ts";
-import { Input, KEY_INPUT, RouteState } from "./types.ts";
+import { Context } from "../types/context.types.ts";
+import { Input, KEY_INPUT, RouteState } from "../types/state.types.ts";
+
+export type { Input, RouteState };
 
 function setInput<T, S extends RouteState<T>>(
   ctx: Context<T, S>,

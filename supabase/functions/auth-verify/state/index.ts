@@ -1,11 +1,14 @@
-import { Context } from "../../_modules/shared/middlewares/types.ts";
-import { State as BaseState } from "../../_modules/shared/state/index.ts";
+// Shared
+import { Context } from "@shared/types/context.types.ts";
+import { State as BaseState } from "@shared/state/index.ts";
+
+// State
 import {
   FunctionState,
   KEY_AUTH_DATA,
   AuthTokens,
   SymbolKey,
-} from "./types.ts";
+} from "./state.types.ts";
 
 function setData<D>(name: SymbolKey) {
   return <T>(ctx: Context<T, FunctionState<T>>, data: D) => {

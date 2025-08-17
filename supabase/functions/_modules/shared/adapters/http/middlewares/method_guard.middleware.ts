@@ -1,7 +1,14 @@
-import { HttpException } from "../error/exception.ts";
-import { RouteState } from "../state/types.ts";
-import { Handler, Middleware } from "./types.ts";
+// Types
+import { type RouteState } from "../../../types/state.types.ts";
+import {
+  type Handler,
+  type Middleware,
+} from "../../../types/middleware.types.ts";
 
+// Error
+import { HttpException } from "../error/exception.ts";
+
+// Middleware
 export function withMethodGuard(
   allowedMethods: string[],
   handler: Handler

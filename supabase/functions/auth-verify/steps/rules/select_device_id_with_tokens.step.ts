@@ -1,7 +1,10 @@
-import { Step } from "../../_modules/shared/composer/chain.ts";
-import { AuthVerifyInput } from "../validators/validator.ts";
-import { AuthTokens, FunctionState } from "../state/types.ts";
-import { selectInputBody } from "../../_modules/shared/selectors/selectors.ts";
+// Shared
+import { Step } from "@shared/core/chain.ts";
+import { selectInputBody } from "@shared/state/selectors/index.ts";
+
+// State
+import { AuthTokens, FunctionState } from "../../state/state.types.ts";
+import { AuthVerifyInput } from "../../validators/validator.ts";
 
 export const selectDeviceIdWithTokens: Step<
   AuthTokens,

@@ -1,13 +1,8 @@
-import { RouteState } from "../state/types.ts";
-
-// Lightweight middleware composition with shared context
-export interface Context<T, S extends RouteState<T>> {
-  request: Request;
-  state: S;
-  response?: Response;
-}
+import { Context } from "./context.types.ts";
+import { RouteState } from "./state.types.ts";
 
 export type Next = () => void | Promise<void>;
+
 // Middleware 는 Context 를 통해 다음 미들웨어를 호출하거나 response 값을 전달한다.
 export type Middleware<T, S extends RouteState<T>> = (
   ctx: Context<T, S>,

@@ -1,9 +1,14 @@
 import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 
-import { HttpException } from "../../_modules/shared/error/exception.ts";
-import { AuthVerifyInput } from "../validators/validator.ts";
-import { AuthTokens, FunctionState } from "../state/types.ts";
-import { Step } from "../../_modules/shared/composer/chain.ts";
+// Shared
+import { Step } from "@shared/core/chain.ts";
+import { HttpException } from "@shared/http/error/exception.ts";
+
+// State
+import { AuthTokens, FunctionState } from "../../state/state.types.ts";
+
+// Validator
+import { AuthVerifyInput } from "../../validators/validator.ts";
 
 // OTP 검증 후 토큰 데이터 반환
 export const verifyOtp = (

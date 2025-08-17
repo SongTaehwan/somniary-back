@@ -1,9 +1,10 @@
-import { Middleware } from "./types.ts";
-import { BodyParser } from "../utils/parser.type.ts";
-import { State } from "../state/index.ts";
+import { type Middleware } from "../../../types/middleware.types.ts";
+import { type BodyParser } from "../../../types/parser.types.ts";
+import { type RouteState } from "../../../types/state.types.ts";
+
+import { State } from "../../../state/index.ts";
 import { HttpException } from "../error/exception.ts";
-import { RouteState } from "../state/types.ts";
-import { task } from "../utils/task.ts";
+import { task } from "../../../utils/task.ts";
 
 // middleware 형태로 구현
 export const parseInputMiddleware = <T, S extends RouteState<T>>(

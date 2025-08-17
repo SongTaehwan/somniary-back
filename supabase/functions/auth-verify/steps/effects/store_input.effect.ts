@@ -1,8 +1,13 @@
-import { Input } from "../../../_modules/shared/state/types.ts";
-import { SideEffect } from "../../../_modules/shared/composer/chain.ts";
-import { AuthVerifyInput } from "../../validators/validator.ts";
-import { FunctionState } from "../../state/types.ts";
+// Shared
+import { SideEffect } from "@shared/core/chain.ts";
+import { Input } from "@shared/types/state.types.ts";
+
+// State
 import { State } from "../../state/index.ts";
+import { FunctionState } from "../../state/state.types.ts";
+
+// Validators
+import { AuthVerifyInput } from "../../validators/validator.ts";
 
 export const storeInput: SideEffect<
   Input<AuthVerifyInput>,

@@ -1,8 +1,11 @@
-import { Step } from "../../_modules/shared/composer/chain.ts";
-import { AuthVerifyInput } from "../validators/validator.ts";
-import { FunctionState } from "../state/types.ts";
-import { Input } from "../../_modules/shared/state/types.ts";
-import { HttpException } from "../../_modules/shared/error/exception.ts";
+// Shared
+import { Step } from "@shared/core/chain.ts";
+import { Input } from "@shared/types/state.types.ts";
+import { HttpException } from "@shared/http/error/exception.ts";
+
+// State
+import { FunctionState } from "../../state/state.types.ts";
+import { AuthVerifyInput } from "../../validators/validator.ts";
 
 export const selectTokenHash: Step<
   Input<AuthVerifyInput>,

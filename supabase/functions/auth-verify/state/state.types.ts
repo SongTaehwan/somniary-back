@@ -1,4 +1,4 @@
-import { RouteState } from "../../_modules/shared/state/types.ts";
+import { RouteState } from "@shared/types/state.types.ts";
 
 export const KEY_AUTH_DATA: unique symbol = Symbol("auth_data");
 

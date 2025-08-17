@@ -1,10 +1,9 @@
-import { Input, RouteState } from "../state/types.ts";
+import { Input, RouteState } from "../../../types/state.types.ts";
 import { HttpException } from "../error/exception.ts";
-import { FirstStep } from "../composer/chain.ts";
-import { BodyParser } from "../utils/parser.type.ts";
-import { task } from "../utils/task.ts";
+import { FirstStep } from "../../../core/chain.ts";
+import { BodyParser } from "../../../types/parser.types.ts";
+import { task } from "../../../utils/task.ts";
 
-// Step 형태로 구현
 export const parseInputStep = <T, S extends RouteState<T>>(
   parser?: BodyParser<T>
 ): FirstStep<Input<T>, T, S> => {

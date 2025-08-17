@@ -1,9 +1,9 @@
-import { Middleware } from "../middlewares/types.ts";
-import { HttpException } from "../error/exception.ts";
-import { RouteState } from "../state/types.ts";
-import { Selector } from "../selectors/types.ts";
-import { Context } from "../middlewares/types.ts";
-import { toError } from "../error/normalize.ts";
+import { Middleware } from "../types/middleware.types.ts";
+import { HttpException } from "../adapters/http/error/exception.ts";
+import { Context } from "../types/context.types.ts";
+import { toError } from "../adapters/http/error/normalize.ts";
+import { RouteState } from "../types/state.types.ts";
+import { Selector } from "../state/selectors/selectors.types.ts";
 
 // Variadic pipeline step: first(ctx) → step(prev, ctx) → ...
 export type Step<In, Out, Body, State extends RouteState<Body>> = (
