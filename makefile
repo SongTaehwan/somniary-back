@@ -1,7 +1,3 @@
-# 함수 로컬 실행
-run_api:
-	supabase functions serve api --no-verify-jwt
-
 # DB 로컬 실행
 run_db_only:
 	supabase db start
@@ -9,6 +5,10 @@ run_db_only:
 # Supabase 서비스 실행
 run:
 	supabase start -x storage-api imgproxy
+
+# Supabase 서비스 중지
+stop:
+	supabase stop
 
 # Postgres
 connect_db:
