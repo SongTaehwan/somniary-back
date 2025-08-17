@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@2.55",
+    "@types/jsonwebtoken": "npm:@types/jsonwebtoken",
+    "jsonwebtoken": "npm:jsonwebtoken",
+    "@shared/": "../_modules/shared/",
+    "@local/": "./"
+  }
+}
