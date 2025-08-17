@@ -6,21 +6,35 @@
 
 ```text
 supabase/functions/
-  _modules/                   # 공유 모듈
-    shared/
-      composer/               # 체인 빌더·컴포즈
-      middlewares/            # 요청 가드·입력 파싱
-      state/                  # 공통 입력 상태 헬퍼
-        selectors/            # 읽기 전용 셀렉터
-      steps/                  # 공용 스텝(예: 입력 파싱)
-      error/                  # 표준 에러 응답 포맷
-      utils/                  # 공용 타입/유틸리티
-  [edge_function_name]/       # 도메인 기능
-    usecases/                    # 유즈케이스 체인 정의
-    steps/                    # 도메인 스텝 & 사이드 이펙트
-    state/                    # 도메인 상태 슬롯
-      selectors/              # 읽기 전용 셀렉터
-    validators/               # 입력 스키마 검증
+  _modules/
+    shared/                          # 공용 모듈(프레임워크·경계·상태·보안·인프라)
+      core/                          # 실행 프레임워크: 체인 빌더/컴포저 등
+      adapters/                      # 경계 어댑터(프로토콜별)
+        http/                        # HTTP 경계: 요청 파이프라인/에러/파싱
+          middlewares/               # 메서드 가드·파이프라인 제어·입력 파서
+          error/                     # 예외 → 표준 HTTP 에러 응답 매핑
+          steps/                     # HTTP 페이로드 → 내부 모델 변환 단계
+        websocket/                   # WebSocket 경계(확장 지점)
+        webhook/                     # Webhook 경계(확장 지점)
+      state/                         # 요청 컨텍스트/공용 입력 상태
+        selectors/                   # 공용 읽기 전용 셀렉터
+      security/                      # 보안 포트/타입(JWT 등, 인터페이스만)
+        jwt/
+      types/                         # 공용 타입 모음
+      infra/                         # 외부 시스템 클라이언트(DI로 주입되는 구현)
+      utils/                         # 범용 유틸리티(타입·작업 헬퍼 등)
+
+  [edge_function_name]/              # 비즈니스 함수
+    validators/                      # 입력 검증 스키마/파서(zod 등)
+    state/                           # 함수 단위 컨텍스트 공유 상태/헬퍼
+      selectors/                     # 공유 상태 읽기 전용 셀렉터
+    adapters/                        # 함수 외부 의존 어댑터/팩토리
+      jwt/                           # JWT 의존성 팩토리/바인딩
+    steps/                           # 체인에서 사용하는 세부 단계 모음
+      rules/                         # 컨텍스트 재선택/검증 규칙
+      services/                      # 외부 연동/도메인 서비스 호출
+      effects/                       # 사이드 이펙트(상태 저장/로깅 등) 처리 step
+    usecases/                        # 비즈니스 로직 처리 흐름 정의 및 오케스트레이션
 ```
 
 ### 설계 원칙
@@ -42,7 +56,7 @@ supabase/functions/
 - **State**: Request 수명주기 동안 공유되는 컨텍스트 저장소
 
   - Request Input(headers, query, body) 보관
-  - 도메인별 슬롯 제공(예: `auth_data`)
+  - 도메인별 상태 제공(예: `auth_data`)
   - 쓰기: State 헬퍼로만, 읽기: 셀렉터로만
   - 도메인 확장 규칙: 기능별 `FunctionState<T>`에 unique symbol 슬롯을 정의하고, 해당 슬롯에 대한 `State.setXxx/getXxx` 헬퍼로만 쓰기를 허용
 
