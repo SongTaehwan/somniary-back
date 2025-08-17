@@ -3,6 +3,7 @@ import { BodyParser } from "../utils/parser.type.ts";
 import { State } from "../state/index.ts";
 import { HttpException } from "../error/exception.ts";
 import { RouteState } from "../state/types.ts";
+import { task } from "../utils/task.ts";
 
 // middleware 형태로 구현
 export const parseInputMiddleware = <T, S extends RouteState<T>>(
@@ -18,16 +19,17 @@ export const parseInputMiddleware = <T, S extends RouteState<T>>(
     let body: unknown = undefined;
 
     if (parser) {
-      try {
-        const raw = await ctx.request.json();
-        body = await parser(raw);
-      } catch (error) {
-        ctx.response = HttpException.badRequest(
-          error instanceof Error ? error.message : "bad_request"
-        );
+      const parsingTask = await task(
+        ctx.request.json(),
+        "parseInputMiddleware_parse"
+      );
 
-        return;
+      if (parsingTask.failed) {
+        ctx.response = HttpException.badRequest("bad_request");
+        throw parsingTask.error;
       }
+
+      body = parsingTask.value;
     }
 
     State.setInput(ctx, {

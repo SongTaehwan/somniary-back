@@ -1,6 +1,7 @@
 import { JwtPayload } from "npm:jsonwebtoken";
 
 // Shared
+import { task } from "../../_modules/shared/utils/task.ts";
 import { HttpException } from "../../_modules/shared/error/exception.ts";
 import { JwtDependencies } from "../../_modules/shared/ports/jwt.ts";
 import { Step } from "../../_modules/shared/composer/chain.ts";
@@ -35,58 +36,45 @@ interface JwtClaims extends JwtPayload {
 }
 
 export const resignJwtWithDeviceIdStep = (
-  dependencies: JwtDependencies<JwtClaims>
+  dependency: JwtDependencies<JwtClaims>
 ): Step<
   { device_id: string; access_token: string; refresh_token: string },
   AuthTokens,
   AuthVerifyInput,
   FunctionState<AuthVerifyInput>
 > => {
-  const { verify, sign } = dependencies;
-
   return async ({ device_id, access_token, refresh_token }, ctx) => {
     // 1) 기존 access_token 검증
-    let claims: JwtClaims;
+    const verifyTask = await task(
+      dependency.verify(access_token),
+      "resignJwtWithDeviceIdStep_verify"
+    );
 
-    try {
-      claims = await verify(access_token);
-    } catch (error) {
-      console.error(
-        `[resignJwtWithDeviceIdStep_verify_error]: ${JSON.stringify(
-          error,
-          Object.getOwnPropertyNames(error)
-        )}`
-      );
-
-      if (error instanceof Error) {
-        ctx.response = HttpException.badRequest("Invalid token");
-        throw Object.assign(error, { cause: "resignJwtWithDeviceIdStep" });
-      }
-
-      throw error;
+    if (verifyTask.failed) {
+      // 클라이언트 응답
+      ctx.response = HttpException.badRequest("Invalid token");
+      // 내부 로깅 및 추적
+      throw verifyTask.error;
     }
+
+    const claims = verifyTask.value;
 
     // 2) 새 토큰 발급 (유효기간은 기존과 동일하게 가져갈 수도 있고, 새로 설정 가능)
-    try {
-      const newAccessToken = await sign({ ...claims, device_id });
+    const signTask = await task(
+      dependency.sign({ ...claims, device_id }),
+      "resignJwtWithDeviceIdStep_sign"
+    );
 
-      return {
-        access_token: newAccessToken,
-        refresh_token,
-      };
-    } catch (error) {
-      console.error(
-        `[resignJwtWithDeviceIdStep_sign_error]: ${JSON.stringify(
-          error,
-          Object.getOwnPropertyNames(error)
-        )}`
-      );
-
-      if (error instanceof Error) {
-        ctx.response = HttpException.internalError("Cannot sign token");
-      }
-
-      throw error;
+    if (signTask.failed) {
+      // 클라이언트 응답
+      ctx.response = HttpException.internalError("Cannot sign token");
+      // 내부 로깅 및 추적
+      throw signTask.error;
     }
+
+    return {
+      access_token: signTask.value,
+      refresh_token,
+    };
   };
 };
