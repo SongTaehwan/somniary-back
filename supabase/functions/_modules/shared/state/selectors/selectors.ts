@@ -1,6 +1,6 @@
-import { Context } from "../middlewares/types.ts";
-import { State } from "../state/index.ts";
-import { type RouteState } from "../state/types.ts";
+import { Context } from "../../middlewares/types.ts";
+import { State } from "../index.ts";
+import { type RouteState } from "../types.ts";
 
 export const selectInputBody = <T, S extends RouteState<T>>(
   ctx: Context<T, S>

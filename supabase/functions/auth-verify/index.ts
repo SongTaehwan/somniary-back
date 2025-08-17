@@ -10,10 +10,10 @@ import { AuthVerifyInput } from "./validators/validator.ts";
 
 // State
 import { FunctionState } from "./state/types.ts";
-import { selectAuthData } from "./selectors/selectors.ts";
+import { selectAuthData } from "./state/selectors/selectors.ts";
 
 // Chains
-import { tokenResignChain } from "./chains/chains.ts";
+import { tokenResignChain } from "./usecases/usecacses.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 Deno.serve(

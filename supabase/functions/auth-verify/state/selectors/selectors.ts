@@ -1,7 +1,7 @@
-import { Context } from "../../_modules/shared/middlewares/types.ts";
-import { AuthTokens, FunctionState } from "../state/types.ts";
-import { AuthVerifyInput } from "../validators/validator.ts";
-import { State } from "../state/index.ts";
+import { Context } from "../../../_modules/shared/middlewares/types.ts";
+import { AuthTokens, FunctionState } from "../types.ts";
+import { AuthVerifyInput } from "../../validators/validator.ts";
+import { State } from "../../state/index.ts";
 
 export const selectAuthData = (
   ctx: Context<AuthVerifyInput, FunctionState<AuthVerifyInput>>
