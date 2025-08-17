@@ -2,7 +2,7 @@ import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 
 // Shared
 import { Step } from "@shared/core/chain.ts";
-import { HttpException } from "@shared/http/error/exception.ts";
+import { HttpException } from "@shared/adapters/http/error/exception.ts";
 
 // State
 import { AuthTokens, FunctionState } from "../../state/state.types.ts";

@@ -2,7 +2,7 @@ import { JwtPayload } from "npm:jsonwebtoken";
 
 // Shared
 import { task } from "@shared/utils/task.ts";
-import { HttpException } from "@shared/http/error/exception.ts";
+import { HttpException } from "@shared/adapters/http/error/exception.ts";
 import { type JwtDependencies } from "@shared/security/jwt/jwt.ts";
 import { Step } from "@shared/core/chain.ts";
 

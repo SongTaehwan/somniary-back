@@ -1,8 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 // Shared
-import { methodGuard } from "@shared/http/middlewares/method_guard.middleware.ts";
-import { CONTENT_TYPES } from "@shared/http/error/constant.ts";
+import { methodGuard } from "@shared/adapters/http/middlewares/method_guard.middleware.ts";
+import { CONTENT_TYPES } from "@shared/adapters/http/error/constant.ts";
 import { compose } from "@shared/core/compose.ts";
 
 // Validators
