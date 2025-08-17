@@ -7,13 +7,49 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
+      device_sessions: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          last_seen: string
+          platform: Database["public"]["Enums"]["device_platform"]
+          push_token: string
+          push_token_type: Database["public"]["Enums"]["push_vendor"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          last_seen?: string
+          platform: Database["public"]["Enums"]["device_platform"]
+          push_token: string
+          push_token_type: Database["public"]["Enums"]["push_vendor"]
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          last_seen?: string
+          platform?: Database["public"]["Enums"]["device_platform"]
+          push_token?: string
+          push_token_type?: Database["public"]["Enums"]["push_vendor"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       diaries: {
         Row: {
           content: string
@@ -46,21 +82,21 @@ export type Database = {
           created_at: string
           id: string
           token: string
-          type: Database["public"]["Enums"]["notification_type"]
+          type: Database["public"]["Enums"]["push_vendor"]
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           token?: string
-          type?: Database["public"]["Enums"]["notification_type"]
+          type?: Database["public"]["Enums"]["push_vendor"]
           user_id?: string
         }
         Update: {
           created_at?: string
           id?: string
           token?: string
-          type?: Database["public"]["Enums"]["notification_type"]
+          type?: Database["public"]["Enums"]["push_vendor"]
           user_id?: string
         }
         Relationships: []
@@ -97,7 +133,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      notification_type: "apns" | "fcm"
+      device_platform: "ios" | "android" | "web"
+      push_vendor: "apns" | "fcm"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -225,7 +262,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      notification_type: ["apns", "fcm"],
+      device_platform: ["ios", "android", "web"],
+      push_vendor: ["apns", "fcm"],
     },
   },
 } as const
