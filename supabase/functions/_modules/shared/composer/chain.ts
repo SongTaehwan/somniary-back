@@ -3,6 +3,7 @@ import { HttpException } from "../error/exception.ts";
 import { RouteState } from "../state/types.ts";
 import { Selector } from "../selectors/types.ts";
 import { Context } from "../middlewares/types.ts";
+import { toError } from "../error/normalize.ts";
 
 // Variadic pipeline step: first(ctx) → step(prev, ctx) → ...
 export type Step<In, Out, Body, State extends RouteState<Body>> = (
@@ -70,18 +71,17 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
       try {
         await this.run(ctx);
         await next();
-      } catch (error) {
+      } catch (err) {
+        const error = toError(err);
+
         if (!ctx.response) {
-          ctx.response = HttpException.badRequest(
-            error instanceof Error ? error.message : "invalid_input"
-          );
+          ctx.response = HttpException.internalError(error.message);
         }
 
         console.error(
-          `[chain_to_middleware_error]: ${JSON.stringify(
-            error,
-            Object.getOwnPropertyNames(error)
-          )}`
+          `[chain_to_middleware_error]\n`,
+          `Causion: ${error.cause ?? "unknown"}\n`,
+          `${error.stack}`
         );
       }
     };

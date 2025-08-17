@@ -1,4 +1,5 @@
 import { HttpException } from "../error/exception.ts";
+import { toError } from "../error/normalize.ts";
 import {
   Context,
   FinalHandler,
@@ -45,18 +46,17 @@ export function compose<T, S extends RouteState<T>>(
 
       try {
         await fn(ctx, next);
-      } catch (error) {
+      } catch (err) {
+        const error = toError(err);
+
         if (!ctx.response) {
-          ctx.response = HttpException.internalError(
-            error instanceof Error ? error.message : undefined
-          );
+          ctx.response = HttpException.internalError(error.message);
         }
 
         console.error(
-          `[compose_dispatch_error]: ${JSON.stringify(
-            error,
-            Object.getOwnPropertyNames(error)
-          )}`
+          `[compose_dispatch_error]\n`,
+          `Causion: ${error.cause ?? "unknown"}\n`,
+          `${error.stack}`
         );
       }
     };
@@ -69,12 +69,13 @@ export function compose<T, S extends RouteState<T>>(
 
     try {
       return await handler(ctx);
-    } catch (error) {
+    } catch (err) {
+      const error = toError(err);
+
       console.error(
-        `[compose_handler_error]: ${JSON.stringify(
-          error,
-          Object.getOwnPropertyNames(error)
-        )}`
+        `[compose_handler_error]\n`,
+        `Causion: ${error.cause ?? "unknown"}\n`,
+        `${error.stack}`
       );
 
       return HttpException.internalError(
