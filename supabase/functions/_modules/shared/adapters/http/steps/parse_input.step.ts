@@ -1,8 +1,9 @@
 import { Input, RouteState } from "../../../types/state.types.ts";
 import { HttpException } from "../error/exception.ts";
 import { FirstStep } from "../../../core/chain.ts";
-import { BodyParser } from "../../../types/parser.types.ts";
+
 import { task } from "../../../utils/task.ts";
+import { BodyParser } from "../../../types/parser.type.ts";
 
 export const parseInputStep = <T, S extends RouteState<T>>(
   parser?: BodyParser<T>
