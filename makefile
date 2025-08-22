@@ -27,3 +27,7 @@ dump:
 # 리포트 DB 스키마 타입 생성
 get_db_type:
 	supabase gen types typescript --project-id pipoeqfnniyoknlkqpfm --schema public > database.types.ts
+
+scaffold_func:
+	./scripts/gen_func.sh $(FUNCTION_NAME)
+	
