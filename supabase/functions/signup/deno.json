@@ -4,6 +4,7 @@
     "@types/jsonwebtoken": "npm:@types/jsonwebtoken",
     "jsonwebtoken": "npm:jsonwebtoken",
     "@shared/": "../_modules/shared/",
+    "@auth/": "../_modules/auth/",
     "@local/": "./"
   }
 }

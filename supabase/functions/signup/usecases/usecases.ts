@@ -19,7 +19,7 @@ import { selectDeviceIdWithTokens } from "@local/steps/rules/select_device_id_wi
 // Validators
 import { AuthVerifyInput, validateInput } from "@local/validators/validator.ts";
 import { FunctionState } from "@local/state/state.types.ts";
-import { createJwtDependencies } from "@local/adapters/jwt/jwt.ts";
+import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 
