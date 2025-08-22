@@ -8,9 +8,12 @@ import {
 // Error
 import { HttpException } from "../error/exception.ts";
 
+// create Method type
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
+
 // Middleware
 export function withMethodGuard(
-  allowedMethods: string[],
+  allowedMethods: HttpMethod[],
   handler: Handler
 ): Handler {
   const allowed = allowedMethods.map((method) => method.toUpperCase());
@@ -28,7 +31,7 @@ export function withMethodGuard(
 }
 
 export function methodGuard<T, S extends RouteState<T>>(
-  allowedMethods: string[]
+  allowedMethods: HttpMethod[]
 ): Middleware<T, S> {
   const allowed = allowedMethods.map((method) => method.toUpperCase());
 
