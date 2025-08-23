@@ -24,7 +24,7 @@ export const parseInputMiddleware = <
 
     if (bodyParser) {
       const parsingTask = await task(
-        bodyParser(ctx.request.json()),
+        bodyParser(await ctx.request.json()),
         "parseInputMiddleware_parse_body"
       );
 

@@ -22,7 +22,7 @@ export const parseInputStep = <
 
     if (bodyParser) {
       const parsingTask = await task<Body>(
-        bodyParser(ctx.request.json()),
+        bodyParser(await ctx.request.json()),
         "parseInputStep_parse_body"
       );
 
