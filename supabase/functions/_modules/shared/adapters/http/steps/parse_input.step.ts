@@ -3,24 +3,27 @@ import { HttpException } from "../error/exception.ts";
 import { FirstStep } from "../../../core/chain.ts";
 
 import { task } from "../../../utils/task.ts";
-import { BodyParser } from "../../../types/parser.type.ts";
+import { BodyParser, QueryParser } from "../../../types/parser.type.ts";
 
-export const parseInputStep = <T, S extends RouteState<T>>(
-  parser?: BodyParser<T>
-): FirstStep<Input<T>, T, S> => {
-  return async (ctx): Promise<Input<T>> => {
-    // 쿼리스트링
-    const url = new URL(ctx.request.url);
-    // 헤더
-    const headers = Object.fromEntries(ctx.request.headers.entries());
+export const parseInputStep = <
+  Body,
+  Query,
+  State extends RouteState<Body, Query>
+>({
+  bodyParser,
+  queryParser,
+}: {
+  bodyParser?: BodyParser<Body>;
+  queryParser?: QueryParser<Query>;
+}): FirstStep<Input<Body, Query>, Body, Query, State> => {
+  return async (ctx): Promise<Input<Body, Query>> => {
+    const headers = ctx.request.headers;
+    let body: Body | undefined = undefined;
 
-    // 바디
-    let body: T | undefined = undefined;
-
-    if (parser) {
-      const parsingTask = await task<T>(
-        parser(ctx.request.json()),
-        "parseInputStep_parse"
+    if (bodyParser) {
+      const parsingTask = await task<Body>(
+        bodyParser(ctx.request.json()),
+        "parseInputStep_parse_body"
       );
 
       if (parsingTask.failed) {
@@ -33,9 +36,27 @@ export const parseInputStep = <T, S extends RouteState<T>>(
       body = parsingTask.value;
     }
 
+    let query: Query | undefined = undefined;
+
+    if (queryParser) {
+      const url = new URL(ctx.request.url);
+
+      const parsingTask = await task<Query>(
+        queryParser(url.searchParams),
+        "parseInputStep_parse_query"
+      );
+
+      if (parsingTask.failed) {
+        ctx.response = HttpException.badRequest("invalid query");
+        throw parsingTask.error;
+      }
+
+      query = parsingTask.value;
+    }
+
     return {
       headers,
-      query: url.searchParams,
+      query,
       body,
     };
   };

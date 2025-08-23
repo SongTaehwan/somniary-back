@@ -8,10 +8,8 @@ import {
 // Error
 import { HttpException } from "../error/exception.ts";
 
-// create Method type
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
 
-// Middleware
 export function withMethodGuard(
   allowedMethods: HttpMethod[],
   handler: Handler
