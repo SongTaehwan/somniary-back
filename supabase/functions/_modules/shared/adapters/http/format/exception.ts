@@ -1,4 +1,4 @@
-import { HTTP_ERRORS, HTTP_STATUS, CONTENT_TYPES } from "../error/constant.ts";
+import { HTTP_ERRORS, HTTP_STATUS, CONTENT_TYPES } from "../format/constant.ts";
 
 export class HttpException {
   private readonly response: Response;

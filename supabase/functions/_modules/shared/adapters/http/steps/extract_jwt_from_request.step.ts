@@ -1,4 +1,4 @@
-import { HttpException } from "../error/exception.ts";
+import { HttpException } from "../format/exception.ts";
 import { FirstStep } from "../../../core/chain.ts";
 import { RouteState } from "../../../types/state.types.ts";
 

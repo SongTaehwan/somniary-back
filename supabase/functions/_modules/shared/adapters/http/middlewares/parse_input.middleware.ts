@@ -2,7 +2,7 @@ import { type Middleware } from "../../../types/middleware.types.ts";
 import { type RouteState } from "../../../types/state.types.ts";
 
 import { State } from "../../../state/index.ts";
-import { HttpException } from "../error/exception.ts";
+import { HttpException } from "../format/exception.ts";
 import { task } from "../../../utils/task.ts";
 import { BodyParser, QueryParser } from "../../../types/parser.type.ts";
 

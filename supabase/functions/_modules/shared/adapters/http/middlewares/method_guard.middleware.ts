@@ -6,7 +6,7 @@ import {
 } from "../../../types/middleware.types.ts";
 
 // Error
-import { HttpException } from "../error/exception.ts";
+import { HttpException } from "../format/exception.ts";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
 
