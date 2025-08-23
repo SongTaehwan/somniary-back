@@ -8,16 +8,20 @@ import { SignUpBody } from "@local/validators";
 
 export const selectTokenHash: Step<
   Input<SignUpBody>,
-  string,
+  { otpToken: string; email: string },
   SignUpBody,
   unknown,
   FunctionState<SignUpBody>
 > = (input, _ctx) => {
-  const tokenHash = input.body?.token_hash;
+  const otpToken = input.body?.otp_token;
+  const email = input.body?.email;
 
-  if (!tokenHash) {
-    throw new Error("token_hash_not_found");
+  if (!otpToken || !email) {
+    throw new Error("required_fields_not_found");
   }
 
-  return tokenHash;
+  return {
+    otpToken,
+    email,
+  };
 };

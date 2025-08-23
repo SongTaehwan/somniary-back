@@ -13,10 +13,17 @@ import { SignUpBody } from "@local/validators";
 // OTP 검증 후 토큰 데이터 반환
 export const verifyOtp = (
   supabase: SupabaseClient
-): Step<string, AuthTokens, SignUpBody, unknown, FunctionState<SignUpBody>> => {
-  return async (tokenHash, ctx) => {
+): Step<
+  { otpToken: string; email: string },
+  AuthTokens,
+  SignUpBody,
+  unknown,
+  FunctionState<SignUpBody>
+> => {
+  return async ({ otpToken, email }, ctx) => {
     const { data, error } = await supabase.auth.verifyOtp({
-      token_hash: tokenHash,
+      token: otpToken,
+      email,
       type: "magiclink",
     });
 
