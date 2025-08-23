@@ -1,7 +1,7 @@
 import { Middleware } from "../types/middleware.types.ts";
-import { HttpException } from "../adapters/http/error/exception.ts";
+import { HttpException } from "../adapters/http/format/exception.ts";
 import { Context } from "../types/context.types.ts";
-import { toError } from "../adapters/http/error/normalize.ts";
+import { toError } from "../adapters/http/format/normalize.ts";
 import { RouteState } from "../types/state.types.ts";
 import { Selector } from "../state/selectors/selectors.types.ts";
 

@@ -1,4 +1,4 @@
-import { toError } from "../adapters/http/error/normalize.ts";
+import { toError } from "../adapters/http/format/normalize.ts";
 
 type Task<T> = Promise<T> | T;
 type Thunk<T> = () => Task<T>;

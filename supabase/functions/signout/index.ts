@@ -3,7 +3,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 // Shared
 import { compose } from "@shared/core/compose.ts";
 import { methodGuard } from "@shared/adapters/http/middlewares/method_guard.middleware.ts";
-import { HttpResponse } from "@shared/adapters/http/error/response.ts";
+import { HttpResponse } from "@shared/adapters/http/format/response.ts";
 
 // Validators
 import { type SignOutBody, type SignOutQuery } from "@local/validators";

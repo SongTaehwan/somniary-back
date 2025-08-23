@@ -1,5 +1,5 @@
-import { HttpException } from "../adapters/http/error/exception.ts";
-import { toError } from "../adapters/http/error/normalize.ts";
+import { HttpException } from "../adapters/http/format/exception.ts";
+import { toError } from "../adapters/http/format/normalize.ts";
 import {
   FinalHandler,
   Handler,

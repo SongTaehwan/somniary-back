@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 // Shared
 import { methodGuard } from "@shared/adapters/http/middlewares/method_guard.middleware.ts";
-import { HttpResponse } from "@shared/adapters/http/error/response.ts";
+import { HttpResponse } from "@shared/adapters/http/format/response.ts";
 import { compose } from "@shared/core/compose.ts";
 
 // Validators

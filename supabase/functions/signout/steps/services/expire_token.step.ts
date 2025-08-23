@@ -3,7 +3,7 @@ import { SupabaseClient } from "jsr:@supabase/supabase-js";
 import { Token } from "@shared/adapters/http/steps/extract_jwt_from_request.step.ts";
 import { Step } from "@shared/core/chain.ts";
 import { FunctionState } from "@local/state";
-import { HttpException } from "@shared/adapters/http/error/exception.ts";
+import { HttpException } from "@shared/adapters/http/format/exception.ts";
 
 export const expireTokenStep = (
   supabase: SupabaseClient
