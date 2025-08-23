@@ -23,15 +23,23 @@ import { z } from "npm:zod";
 import { createValidator } from "@shared/utils/validator.ts";
 import { parseInputStep } from "@shared/steps/parser";
 
-const schema = z.object({
+// HTTP 요청 body 검증 함수 정의
+const bodySchema = z.object({
   // define schema
 });
 
-export type ${PASCAL_FUNC_NAME}Input = z.infer<typeof schema>;
+// HTTP 요청 query 검증 함수 정의
+const querySchema = z.object({
+  // define schema
+});
 
-// HTTP 요청 body 검증 함수 정의
-export const validateBody = createValidator(schema);
-export const validateBodyStep = parseInputStep(validateBody);
+export type ${PASCAL_FUNC_NAME}Body = z.infer<typeof bodySchema>;
+export type ${PASCAL_FUNC_NAME}Query = z.infer<typeof querySchema>;
+
+export const validateBodyStep = parseInputStep({
+  bodyParser: createValidator(bodySchema),
+  queryParser: createValidator(querySchema),
+});
 EOF
 
 echo "🔨 Validator 생성 완료"
@@ -53,8 +61,7 @@ export type ${PASCAL_FUNC_NAME}State = {
 };
 
 // 함수 도메인 별로 공유될 상태를 정의한다.
-export interface FunctionState<T, Q = URLSearchParams>
-  extends RouteState<T, Q> {
+export interface FunctionState<T, Q = unknown> extends RouteState<T, Q> {
   [KEY_${UPPER_FUNC_NAME}_DATA]?: ${PASCAL_FUNC_NAME}State;
 }
 EOF
@@ -71,27 +78,22 @@ import { chain } from "@shared/core/chain.ts";
 import { type Input } from "@shared/types/state.types.ts";
 
 // Validators
-import { type ${PASCAL_FUNC_NAME}Input, validateBodyStep } from "@local/validators";
+import { 
+  type ${PASCAL_FUNC_NAME}Body, 
+  type ${PASCAL_FUNC_NAME}Query, 
+  validateBodyStep,
+} from "@local/validators";
 
 // State
 import { type FunctionState } from "@local/state";
 
 export const usecase = chain<
-  ${PASCAL_FUNC_NAME}Input,
-  FunctionState<${PASCAL_FUNC_NAME}Input>,
-  Input<${PASCAL_FUNC_NAME}Input>
+  ${PASCAL_FUNC_NAME}Body,
+  ${PASCAL_FUNC_NAME}Query,
+  FunctionState<${PASCAL_FUNC_NAME}Body, ${PASCAL_FUNC_NAME}Query>,
+  Input<${PASCAL_FUNC_NAME}Body, ${PASCAL_FUNC_NAME}Query>
 >(validateBodyStep);
 
 EOF
 
 echo "🔨 Usecase 생성 완료"
-
-
-echo "--------------------------------"
-echo "🔨 템플릿 파일 생성 완료"
-echo "--------------------------------"
-
-# touch -p $USECASE_DIR/index.ts
-# touch -p $STATE_DIR/index.ts
-# touch -p $STATE_DIR/state.types.ts
-# touch -p $STATE_DIR/selectors/index.ts

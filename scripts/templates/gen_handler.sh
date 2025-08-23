@@ -20,13 +20,17 @@ import { methodGuard } from "@shared/adapters/http/middlewares/method_guard.midd
 import { CONTENT_TYPES } from "@shared/adapters/http/error/constant.ts";
 
 // Validators
-import { type ${PASCAL_FUNC_NAME}Input } from "@local/validators";
+import { type ${PASCAL_FUNC_NAME}Body, type ${PASCAL_FUNC_NAME}Query } from "@local/validators";
 
 // State
 import { type FunctionState } from "@local/state";
 
 Deno.serve(
-  compose<${PASCAL_FUNC_NAME}Input, FunctionState<${PASCAL_FUNC_NAME}Input>>(
+  compose<
+    ${PASCAL_FUNC_NAME}Body, 
+    ${PASCAL_FUNC_NAME}Query, 
+    FunctionState<${PASCAL_FUNC_NAME}Body, ${PASCAL_FUNC_NAME}Query>
+  >(
     [
       methodGuard(["POST"]),
       // add chain
