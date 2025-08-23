@@ -1,7 +1,7 @@
 import jwt, { type JwtPayload } from "npm:jsonwebtoken";
 
 // Shared
-import { type JwtDependencies } from "../../shared/security/jwt/jwt.ts";
+import { type JwtDependencies } from "../security/jwt.ts";
 
 // 팩토리
 // 토큰 발급 및 검증 의존성 주입

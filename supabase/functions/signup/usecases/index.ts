@@ -8,7 +8,7 @@ import { Input } from "@shared/types/state.types.ts";
 
 // Steps
 import { verifyOtp } from "@local/steps/services/verify_otp.step.ts";
-import { resignJwtWithDeviceIdStep } from "@local/steps/services/resign_jwt_with_device_id.step.ts";
+import { resignJwtWithDeviceIdStep } from "@auth/steps/resign_jwt_with_device_id.step.ts";
 import { storeInput } from "@local/steps/effects/store_input.effect.ts";
 import { storeAuth } from "@local/steps/effects/store_auth.effect.ts";
 

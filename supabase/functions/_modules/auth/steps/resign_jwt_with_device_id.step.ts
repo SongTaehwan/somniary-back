@@ -1,16 +1,18 @@
 import { JwtPayload } from "npm:jsonwebtoken";
 
 // Shared
-import { task } from "@shared/utils/task.ts";
-import { HttpException } from "@shared/adapters/http/format/exception.ts";
-import { type JwtDependencies } from "@shared/security/jwt/jwt.ts";
-import { Step } from "@shared/core/chain.ts";
+import { task } from "../../shared/utils/task.ts";
+import { Step } from "../../shared/core/chain.ts";
+import { HttpException } from "../../shared/adapters/http/format/exception.ts";
+
+// Auth
+import { type JwtDependencies } from "../security/jwt.ts";
 
 // State
-import { FunctionState, AuthTokens } from "@local/state/index.ts";
+import { type AuthTokens } from "../types/index.ts";
 
 // Validator
-import { SignUpBody } from "@local/validators";
+import { type RouteState } from "../../shared/types/state.types.ts";
 
 interface JwtClaims extends JwtPayload {
   iss: string;
@@ -35,14 +37,18 @@ interface JwtClaims extends JwtPayload {
   ref?: string; // Only in anon/service role tokens
 }
 
-export const resignJwtWithDeviceIdStep = (
+export const resignJwtWithDeviceIdStep = <
+  Body,
+  Query,
+  State extends RouteState<Body, Query>
+>(
   dependency: JwtDependencies<JwtClaims>
 ): Step<
   { device_id: string; access_token: string; refresh_token: string },
   AuthTokens,
-  SignUpBody,
-  unknown,
-  FunctionState<SignUpBody>
+  Body,
+  Query,
+  State
 > => {
   return async ({ device_id, access_token, refresh_token }, ctx) => {
     // 1) 기존 access_token 검증
