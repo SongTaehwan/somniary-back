@@ -1,7 +1,7 @@
 import { HTTP_ERRORS, HTTP_STATUS, CONTENT_TYPES } from "../error/constant.ts";
 
 export class HttpException {
-  public readonly response: Response;
+  private readonly response: Response;
 
   constructor(
     error: keyof typeof HTTP_ERRORS,
