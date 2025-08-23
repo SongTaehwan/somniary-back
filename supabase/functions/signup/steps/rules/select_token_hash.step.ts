@@ -1,17 +1,17 @@
 // Shared
-import { Step } from "@shared/core/chain.ts";
-import { Input } from "@shared/types/state.types.ts";
+import { type Step } from "@shared/core/chain.ts";
+import { type Input } from "@shared/types/state.types.ts";
 
 // State
-import { FunctionState } from "@local/state/index.ts";
-import { SignUpBody } from "@local/validators";
+import { type AuthState } from "@auth/state/index.ts";
+import { type SignUpBody } from "@local/validators";
 
 export const selectTokenHash: Step<
   Input<SignUpBody>,
   { otpToken: string; email: string },
   SignUpBody,
   unknown,
-  FunctionState<SignUpBody>
+  AuthState<SignUpBody>
 > = (input, _ctx) => {
   const otpToken = input.body?.otp_token;
   const email = input.body?.email;

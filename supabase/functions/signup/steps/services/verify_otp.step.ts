@@ -1,14 +1,15 @@
 import { SupabaseClient } from "jsr:@supabase/supabase-js";
 
 // Shared
-import { Step } from "@shared/core/chain.ts";
+import { type Step } from "@shared/core/chain.ts";
 import { HttpException } from "@shared/adapters/http/format/exception.ts";
 
 // State
-import { AuthTokens, FunctionState } from "@local/state/index.ts";
+import { type AuthState } from "@auth/state/index.ts";
+import { type AuthTokens } from "@auth/state/index.ts";
 
 // Validator
-import { SignUpBody } from "@local/validators";
+import { type SignUpBody } from "@local/validators";
 
 // OTP 검증 후 토큰 데이터 반환
 export const verifyOtp = (
@@ -18,7 +19,7 @@ export const verifyOtp = (
   AuthTokens,
   SignUpBody,
   unknown,
-  FunctionState<SignUpBody>
+  AuthState<SignUpBody>
 > => {
   return async ({ otpToken, email }, ctx) => {
     const { data, error } = await supabase.auth.verifyOtp({

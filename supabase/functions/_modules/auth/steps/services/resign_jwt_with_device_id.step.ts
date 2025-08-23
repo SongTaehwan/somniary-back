@@ -1,41 +1,17 @@
-import { JwtPayload } from "npm:jsonwebtoken";
-
 // Shared
-import { task } from "../../shared/utils/task.ts";
-import { Step } from "../../shared/core/chain.ts";
-import { HttpException } from "../../shared/adapters/http/format/exception.ts";
+import { task } from "../../../shared/utils/task.ts";
+import { type Step } from "../../../shared/core/chain.ts";
+import { HttpException } from "../../../shared/adapters/http/format/exception.ts";
 
-// Auth
-import { type JwtDependencies } from "../security/jwt.ts";
+// Security
+import { type JwtDependencies } from "../../security/jwt.ts";
 
 // State
-import { type AuthTokens } from "../types/index.ts";
+import { type AuthTokens } from "../../state/index.ts";
 
-// Validator
-import { type RouteState } from "../../shared/types/state.types.ts";
-
-interface JwtClaims extends JwtPayload {
-  iss: string;
-  aud: string | string[];
-  exp: number;
-  iat: number;
-  sub: string;
-  role: string;
-  aal: "aal1" | "aal2";
-  session_id: string;
-  email: string;
-  phone: string;
-  is_anonymous: boolean;
-  jti?: string;
-  nbf?: number;
-  app_metadata?: Record<string, unknown>;
-  user_metadata?: Record<string, unknown>;
-  amr?: Array<{
-    method: string;
-    timestamp: number;
-  }>;
-  ref?: string; // Only in anon/service role tokens
-}
+// Types
+import { type RouteState } from "../../../shared/types/state.types.ts";
+import { type JwtClaims } from "../../types/index.ts";
 
 export const resignJwtWithDeviceIdStep = <
   Body,

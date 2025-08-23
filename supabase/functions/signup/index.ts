@@ -6,18 +6,18 @@ import { HttpResponse } from "@shared/adapters/http/format/response.ts";
 import { compose } from "@shared/core/compose.ts";
 
 // Validators
-import { SignUpBody } from "@local/validators";
+import { type SignUpBody } from "@local/validators";
 
-// State
-import { FunctionState } from "@local/state/index.ts";
-import { selectAuthData } from "@local/state/selectors/index.ts";
+// Auth
+import { selectAuthData } from "@auth/state/selectors/index.ts";
 
 // Chains
 import { signUpChain } from "@local/usecases";
+import { type AuthState } from "@auth/state/index.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 Deno.serve(
-  compose<SignUpBody, unknown, FunctionState<SignUpBody>>(
+  compose<SignUpBody, unknown, AuthState<SignUpBody>>(
     [methodGuard(["POST"]), signUpChain.toMiddleware()],
     (ctx) => {
       const { access_token, refresh_token } = selectAuthData(ctx);

@@ -4,21 +4,23 @@ import { parseInputStep } from "@shared/adapters/http/steps/parse_input.step.ts"
 import { chain } from "@shared/core/chain.ts";
 
 // Types
-import { Input } from "@shared/types/state.types.ts";
+import { type Input } from "@shared/types/state.types.ts";
 
 // Steps
 import { verifyOtp } from "@local/steps/services/verify_otp.step.ts";
-import { resignJwtWithDeviceIdStep } from "@auth/steps/resign_jwt_with_device_id.step.ts";
 import { storeInput } from "@local/steps/effects/store_input.effect.ts";
-import { storeAuth } from "@local/steps/effects/store_auth.effect.ts";
+
+// Auth
+import { resignJwtWithDeviceIdStep } from "@auth/steps/services/resign_jwt_with_device_id.step.ts";
+import { storeAuthData } from "@auth/steps/rules/store_auth_data.ts";
 
 // Domain
 import { selectTokenHash } from "@local/steps/rules/select_token_hash.step.ts";
 import { selectDeviceIdWithTokens } from "@local/steps/rules/select_device_id_with_tokens.step.ts";
 
 // Validators
-import { SignUpBody, validateInput } from "@local/validators";
-import { FunctionState } from "@local/state/index.ts";
+import { type SignUpBody, validateInput } from "@local/validators";
+import { type AuthState } from "@auth/state/index.ts";
 import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
@@ -27,7 +29,7 @@ import { createJwtDependencies } from "@auth/utils/jwt.ts";
 const requestInputParsingChain = chain<
   SignUpBody,
   unknown,
-  FunctionState<SignUpBody>,
+  AuthState<SignUpBody>,
   Input<SignUpBody>
 >(
   parseInputStep({
@@ -52,4 +54,4 @@ export const signUpChain = deviceSessionChain
       createJwtDependencies(Deno.env.get("JWT_SECRET") ?? "")
     )
   )
-  .tap(storeAuth);
+  .tap(storeAuthData());

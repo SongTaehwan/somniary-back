@@ -1,4 +1,4 @@
-import { RouteState } from "@shared/types/state.types.ts";
+import { type RouteState } from "../../shared/types/state.types.ts";
 
 export const KEY_AUTH_DATA: unique symbol = Symbol("auth_data");
 
@@ -10,6 +10,6 @@ export type AuthTokens = {
 };
 
 // 함수 도메인 별로 공유될 상태를 정의한다.
-export interface FunctionState<T, Q = unknown> extends RouteState<T, Q> {
+export interface AuthState<T, Q = unknown> extends RouteState<T, Q> {
   [KEY_AUTH_DATA]?: AuthTokens;
 }
