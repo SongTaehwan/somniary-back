@@ -6,6 +6,6 @@ export type Input<Body, Query = unknown> = {
   body?: Body;
 };
 
-export interface RouteState<Body, Query> {
+export interface RouteState<Body = unknown, Query = unknown> {
   [KEY_INPUT]?: Input<Body, Query>;
 }

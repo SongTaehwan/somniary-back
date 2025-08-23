@@ -9,25 +9,25 @@ import { Selector } from "../state/selectors/selectors.types.ts";
 export type Step<
   In,
   Out,
-  Body,
-  Query,
-  State extends RouteState<Body, Query>
+  Body = unknown,
+  Query = unknown,
+  State extends RouteState<Body, Query> = RouteState<Body, Query>
 > = (input: In, ctx: Context<Body, Query, State>) => Promise<Out> | Out;
 
 // 인풋을 받지 않는 첫 단계
 export type FirstStep<
   Out,
-  Body,
-  Query,
-  State extends RouteState<Body, Query>
+  Body = unknown,
+  Query = unknown,
+  State extends RouteState<Body, Query> = RouteState<Body, Query>
 > = (ctx: Context<Body, Query, State>) => Promise<Out> | Out;
 
 // 부수효과 타입
 export type SideEffect<
   Acc,
-  Body,
-  Query,
-  State extends RouteState<Body, Query>
+  Body = unknown,
+  Query = unknown,
+  State extends RouteState<Body, Query> = RouteState<Body, Query>
 > = (value: Acc, ctx: Context<Body, Query, State>) => Promise<void> | void;
 
 // Fluent builder for arbitrary-length typed pipelines
