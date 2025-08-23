@@ -10,6 +10,7 @@ export const selectDeviceIdWithTokens: Step<
   AuthTokens,
   { device_id: string; access_token: string; refresh_token: string },
   AuthVerifyInput,
+  unknown,
   FunctionState<AuthVerifyInput>
 > = ({ access_token, refresh_token }, ctx) => {
   const body = selectInputBody(ctx);

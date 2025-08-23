@@ -10,6 +10,7 @@ export const selectTokenHash: Step<
   Input<AuthVerifyInput>,
   string,
   AuthVerifyInput,
+  unknown,
   FunctionState<AuthVerifyInput>
 > = (input, _ctx) => {
   const tokenHash = input.body?.token_hash;

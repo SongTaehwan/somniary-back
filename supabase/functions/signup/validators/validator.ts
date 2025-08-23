@@ -9,5 +9,4 @@ const schema = z.object({
 });
 
 export type AuthVerifyInput = z.infer<typeof schema>;
-
 export const validateInput = createValidator(schema);

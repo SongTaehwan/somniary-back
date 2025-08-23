@@ -30,9 +30,9 @@ export function withMethodGuard(
   };
 }
 
-export function methodGuard<T, S extends RouteState<T>>(
+export function methodGuard<T, Q, S extends RouteState<T, Q>>(
   allowedMethods: HttpMethod[]
-): Middleware<T, S> {
+): Middleware<T, Q, S> {
   const allowed = allowedMethods.map((method) => method.toUpperCase());
 
   return (ctx, next) => {

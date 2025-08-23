@@ -26,9 +26,14 @@ import { createJwtDependencies } from "@auth/utils/jwt.ts";
 // 1. 앱에서 POST 요청 시 device_id, token hash 를 받는다.
 const requestInputParsingChain = chain<
   AuthVerifyInput,
+  unknown,
   FunctionState<AuthVerifyInput>,
   Input<AuthVerifyInput>
->(parseInputStep(validateInput)).tap(storeInput);
+>(
+  parseInputStep({
+    bodyParser: validateInput,
+  })
+).tap(storeInput);
 
 // 2. 토큰 해시 검증 및 토큰 발급한다.
 const authVerifyChain = requestInputParsingChain

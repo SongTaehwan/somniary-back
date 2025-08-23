@@ -41,6 +41,7 @@ export const resignJwtWithDeviceIdStep = (
   { device_id: string; access_token: string; refresh_token: string },
   AuthTokens,
   AuthVerifyInput,
+  unknown,
   FunctionState<AuthVerifyInput>
 > => {
   return async ({ device_id, access_token, refresh_token }, ctx) => {

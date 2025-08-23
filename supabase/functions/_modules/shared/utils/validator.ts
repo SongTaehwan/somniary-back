@@ -1,9 +1,6 @@
 import { z } from "npm:zod";
 
-export async function validator<T>(
-  data: unknown,
-  schema: z.ZodSchema<T>
-): Promise<T> {
+async function validator<T>(data: unknown, schema: z.ZodSchema<T>): Promise<T> {
   const result = await schema.safeParseAsync(data);
 
   if (!result.success) {

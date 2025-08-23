@@ -11,13 +11,13 @@ import {
 } from "@local/state/state.types.ts";
 
 function setData<D>(name: SymbolKey) {
-  return <T>(ctx: Context<T, FunctionState<T>>, data: D) => {
+  return <T, Q>(ctx: Context<T, Q, FunctionState<T, Q>>, data: D) => {
     ctx.state[name] = data as never;
   };
 }
 
 function getData<D>(name: SymbolKey) {
-  return <T>(ctx: Context<T, FunctionState<T>>): D => {
+  return <T, Q>(ctx: Context<T, Q, FunctionState<T, Q>>): D => {
     const data = ctx.state[name];
 
     if (!data) {

@@ -6,39 +6,54 @@ import { RouteState } from "../types/state.types.ts";
 import { Selector } from "../state/selectors/selectors.types.ts";
 
 // Variadic pipeline step: first(ctx) → step(prev, ctx) → ...
-export type Step<In, Out, Body, State extends RouteState<Body>> = (
-  input: In,
-  ctx: Context<Body, State>
-) => Promise<Out> | Out;
+export type Step<
+  In,
+  Out,
+  Body,
+  Query,
+  State extends RouteState<Body, Query>
+> = (input: In, ctx: Context<Body, Query, State>) => Promise<Out> | Out;
 
 // 인풋을 받지 않는 첫 단계
-export type FirstStep<Out, Body, State extends RouteState<Body>> = (
-  ctx: Context<Body, State>
-) => Promise<Out> | Out;
+export type FirstStep<
+  Out,
+  Body,
+  Query,
+  State extends RouteState<Body, Query>
+> = (ctx: Context<Body, Query, State>) => Promise<Out> | Out;
 
 // 부수효과 타입
-export type SideEffect<Acc, Body, State extends RouteState<Body>> = (
-  value: Acc,
-  ctx: Context<Body, State>
-) => Promise<void> | void;
+export type SideEffect<
+  Acc,
+  Body,
+  Query,
+  State extends RouteState<Body, Query>
+> = (value: Acc, ctx: Context<Body, Query, State>) => Promise<void> | void;
 
 // Fluent builder for arbitrary-length typed pipelines
-export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
+export class ChainBuilder<
+  Body,
+  Query,
+  State extends RouteState<Body, Query>,
+  Acc
+> {
   constructor(
-    private readonly run: (ctx: Context<Body, State>) => Promise<Acc> | Acc
+    private readonly run: (
+      ctx: Context<Body, Query, State>
+    ) => Promise<Acc> | Acc
   ) {}
 
-  static start<Body, State extends RouteState<Body>, Acc>(
-    first: FirstStep<Acc, Body, State>
-  ): ChainBuilder<Body, State, Acc> {
+  static start<Body, Query, State extends RouteState<Body, Query>, Acc>(
+    first: FirstStep<Acc, Body, Query, State>
+  ): ChainBuilder<Body, Query, State, Acc> {
     return new ChainBuilder(first);
   }
 
   // then: 직전 단계의 반환값(Acc)을 다음 단계의 입력으로 전달합니다.
   // 예) 1단계 Out → 2단계 In, 2단계 Out → 3단계 In ... 으로 연쇄됩니다.
   then<Next>(
-    nextStep: Step<Acc, Next, Body, State>
-  ): ChainBuilder<Body, State, Next> {
+    nextStep: Step<Acc, Next, Body, Query, State>
+  ): ChainBuilder<Body, Query, State, Next> {
     return new ChainBuilder(async (ctx) => {
       const previousStep = await this.run(ctx);
       return nextStep(previousStep, ctx);
@@ -47,7 +62,9 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
 
   // tap: 직전 단계의 반환값을 변경하지 않고 부수효과만 수행합니다.
   // 이후 단계의 입력은 여전히 이전 단계의 반환값(Acc)입니다.
-  tap(fn: SideEffect<Acc, Body, State>): ChainBuilder<Body, State, Acc> {
+  tap(
+    fn: SideEffect<Acc, Body, Query, State>
+  ): ChainBuilder<Body, Query, State, Acc> {
     return new ChainBuilder(async (ctx) => {
       const value = await this.run(ctx);
       await fn(value, ctx);
@@ -58,15 +75,15 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
   // reselect: 직전 단계의 반환값을 무시하고, 컨텍스트에서 새 값을 선택해 다음 단계의 입력으로 전달합니다.
   // 직전 Out 무시, 컨텍스트에서 새 값 선택해 다음 In
   reselect<Next>(
-    selector: Selector<Next, Body, State>
-  ): ChainBuilder<Body, State, Next> {
+    selector: Selector<Next, Body, Query, State>
+  ): ChainBuilder<Body, Query, State, Next> {
     return new ChainBuilder(async (ctx) => {
       await this.run(ctx);
       return selector(ctx);
     });
   }
 
-  toMiddleware(): Middleware<Body, State> {
+  toMiddleware(): Middleware<Body, Query, State> {
     return async (ctx, next) => {
       try {
         await this.run(ctx);
@@ -88,8 +105,8 @@ export class ChainBuilder<Body, State extends RouteState<Body>, Acc> {
   }
 }
 
-export function chain<Body, State extends RouteState<Body>, A>(
-  first: FirstStep<A, Body, State>
-): ChainBuilder<Body, State, A> {
+export function chain<Body, Query, State extends RouteState<Body, Query>, Acc>(
+  first: FirstStep<Acc, Body, Query, State>
+): ChainBuilder<Body, Query, State, Acc> {
   return ChainBuilder.start(first);
 }

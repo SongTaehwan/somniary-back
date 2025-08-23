@@ -17,6 +17,7 @@ export const verifyOtp = (
   string,
   AuthTokens,
   AuthVerifyInput,
+  unknown,
   FunctionState<AuthVerifyInput>
 > => {
   return async (tokenHash, ctx) => {

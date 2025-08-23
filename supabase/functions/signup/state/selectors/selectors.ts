@@ -7,7 +7,7 @@ import { AuthVerifyInput } from "@local/validators/validator.ts";
 import { State } from "@local/state/index.ts";
 
 export const selectAuthData = (
-  ctx: Context<AuthVerifyInput, FunctionState<AuthVerifyInput>>
+  ctx: Context<AuthVerifyInput, unknown, FunctionState<AuthVerifyInput>>
 ): AuthTokens => {
   const body = State.getAuthData(ctx);
 

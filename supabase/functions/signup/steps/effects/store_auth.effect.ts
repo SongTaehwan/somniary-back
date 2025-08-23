@@ -11,6 +11,7 @@ import { AuthVerifyInput } from "@local/validators/validator.ts";
 export const storeAuth: SideEffect<
   AuthTokens,
   AuthVerifyInput,
+  unknown,
   FunctionState<AuthVerifyInput>
 > = (auth, ctx) => {
   State.setAuthData(ctx, auth);

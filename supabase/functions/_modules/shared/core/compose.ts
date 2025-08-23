@@ -10,12 +10,12 @@ import { type RouteState } from "../types/state.types.ts";
 import { type Context } from "../types/context.types.ts";
 
 // 미들웨어를 모두 호출 후 마지막 핸들러를 호출
-export function compose<T, S extends RouteState<T>>(
-  middlewares: Middleware<T, S>[],
-  handler: FinalHandler<T, S>
+export function compose<T, Q, S extends RouteState<T, Q>>(
+  middlewares: Middleware<T, Q, S>[],
+  handler: FinalHandler<T, Q, S>
 ): Handler {
   return async (request: Request) => {
-    const ctx: Context<T, S> = { request, state: {} as S };
+    const ctx: Context<T, Q, S> = { request, state: {} as S };
 
     let index = -1;
 
