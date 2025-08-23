@@ -3,17 +3,17 @@ import { SideEffect } from "@shared/core/chain.ts";
 import { Input } from "@shared/types/state.types.ts";
 
 // State
-import { State } from "@local/state/index.ts";
-import { FunctionState } from "@local/state/state.types.ts";
+import { State } from "@local/state/selectors/index.ts";
+import { FunctionState } from "@local/state/index.ts";
 
 // Validators
-import { AuthVerifyInput } from "@local/validators/validator.ts";
+import { SignUpBody } from "@local/validators";
 
 export const storeInput: SideEffect<
-  Input<AuthVerifyInput>,
-  AuthVerifyInput,
+  Input<SignUpBody>,
+  SignUpBody,
   unknown,
-  FunctionState<AuthVerifyInput>
+  FunctionState<SignUpBody>
 > = (input, ctx) => {
   State.setInput(ctx, input);
 };

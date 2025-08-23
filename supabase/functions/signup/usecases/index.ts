@@ -17,18 +17,18 @@ import { selectTokenHash } from "@local/steps/rules/select_token_hash.step.ts";
 import { selectDeviceIdWithTokens } from "@local/steps/rules/select_device_id_with_tokens.step.ts";
 
 // Validators
-import { AuthVerifyInput, validateInput } from "@local/validators/validator.ts";
-import { FunctionState } from "@local/state/state.types.ts";
+import { SignUpBody, validateInput } from "@local/validators";
+import { FunctionState } from "@local/state/index.ts";
 import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 
 // 1. 앱에서 POST 요청 시 device_id, token hash 를 받는다.
 const requestInputParsingChain = chain<
-  AuthVerifyInput,
+  SignUpBody,
   unknown,
-  FunctionState<AuthVerifyInput>,
-  Input<AuthVerifyInput>
+  FunctionState<SignUpBody>,
+  Input<SignUpBody>
 >(
   parseInputStep({
     bodyParser: validateInput,
@@ -46,7 +46,7 @@ const deviceSessionChain = authVerifyChain.then(selectDeviceIdWithTokens);
 
 // 4. JWT claim 을 추가한다.
 // 5. 엑세스 토큰 & 리프레시 토큰 반환
-export const tokenResignChain = deviceSessionChain
+export const signUpChain = deviceSessionChain
   .then(
     resignJwtWithDeviceIdStep(
       createJwtDependencies(Deno.env.get("JWT_SECRET") ?? "")

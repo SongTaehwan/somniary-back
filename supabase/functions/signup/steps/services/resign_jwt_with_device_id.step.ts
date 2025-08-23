@@ -7,10 +7,10 @@ import { type JwtDependencies } from "@shared/security/jwt/jwt.ts";
 import { Step } from "@shared/core/chain.ts";
 
 // State
-import { FunctionState, AuthTokens } from "@local/state/state.types.ts";
+import { FunctionState, AuthTokens } from "@local/state/index.ts";
 
 // Validator
-import { AuthVerifyInput } from "@local/validators/validator.ts";
+import { SignUpBody } from "@local/validators";
 
 interface JwtClaims extends JwtPayload {
   iss: string;
@@ -40,9 +40,9 @@ export const resignJwtWithDeviceIdStep = (
 ): Step<
   { device_id: string; access_token: string; refresh_token: string },
   AuthTokens,
-  AuthVerifyInput,
+  SignUpBody,
   unknown,
-  FunctionState<AuthVerifyInput>
+  FunctionState<SignUpBody>
 > => {
   return async ({ device_id, access_token, refresh_token }, ctx) => {
     // 1) 기존 access_token 검증

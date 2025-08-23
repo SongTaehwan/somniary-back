@@ -5,21 +5,15 @@ import { Step } from "@shared/core/chain.ts";
 import { HttpException } from "@shared/adapters/http/error/exception.ts";
 
 // State
-import { AuthTokens, FunctionState } from "@local/state/state.types.ts";
+import { AuthTokens, FunctionState } from "@local/state/index.ts";
 
 // Validator
-import { AuthVerifyInput } from "@local/validators/validator.ts";
+import { SignUpBody } from "@local/validators";
 
 // OTP 검증 후 토큰 데이터 반환
 export const verifyOtp = (
   supabase: SupabaseClient
-): Step<
-  string,
-  AuthTokens,
-  AuthVerifyInput,
-  unknown,
-  FunctionState<AuthVerifyInput>
-> => {
+): Step<string, AuthTokens, SignUpBody, unknown, FunctionState<SignUpBody>> => {
   return async (tokenHash, ctx) => {
     const { data, error } = await supabase.auth.verifyOtp({
       token_hash: tokenHash,

@@ -3,15 +3,15 @@ import { Step } from "@shared/core/chain.ts";
 import { Input } from "@shared/types/state.types.ts";
 
 // State
-import { FunctionState } from "@local/state/state.types.ts";
-import { AuthVerifyInput } from "@local/validators/validator.ts";
+import { FunctionState } from "@local/state/index.ts";
+import { SignUpBody } from "@local/validators";
 
 export const selectTokenHash: Step<
-  Input<AuthVerifyInput>,
+  Input<SignUpBody>,
   string,
-  AuthVerifyInput,
+  SignUpBody,
   unknown,
-  FunctionState<AuthVerifyInput>
+  FunctionState<SignUpBody>
 > = (input, _ctx) => {
   const tokenHash = input.body?.token_hash;
 

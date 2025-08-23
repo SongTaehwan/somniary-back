@@ -8,5 +8,5 @@ const schema = z.object({
   token_hash: z.string(),
 });
 
-export type AuthVerifyInput = z.infer<typeof schema>;
+export type SignUpBody = z.infer<typeof schema>;
 export const validateInput = createValidator(schema);

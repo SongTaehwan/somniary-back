@@ -2,17 +2,17 @@
 import { SideEffect } from "@shared/core/chain.ts";
 
 // State
-import { State } from "@local/state/index.ts";
-import { AuthTokens, FunctionState } from "@local/state/state.types.ts";
+import { State } from "@local/state/selectors/index.ts";
+import { AuthTokens, FunctionState } from "@local/state/index.ts";
 
 // Validators
-import { AuthVerifyInput } from "@local/validators/validator.ts";
+import { SignUpBody } from "@local/validators";
 
 export const storeAuth: SideEffect<
   AuthTokens,
-  AuthVerifyInput,
+  SignUpBody,
   unknown,
-  FunctionState<AuthVerifyInput>
+  FunctionState<SignUpBody>
 > = (auth, ctx) => {
   State.setAuthData(ctx, auth);
 };

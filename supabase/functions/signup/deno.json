@@ -4,7 +4,11 @@
     "@types/jsonwebtoken": "npm:@types/jsonwebtoken",
     "jsonwebtoken": "npm:jsonwebtoken",
     "@shared/": "../_modules/shared/",
+    "@shared/steps/parser": "../_modules/shared/adapters/http/steps/parse_input.step.ts",
     "@auth/": "../_modules/auth/",
-    "@local/": "./"
+    "@local/": "./",
+    "@local/validators": "./validators/index.ts",
+    "@local/usecases": "./usecases/index.ts",
+    "@local/state": "./state/index.ts"
   }
 }

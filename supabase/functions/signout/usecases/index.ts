@@ -13,7 +13,7 @@ import { type SignOutQuery, type SignOutBody } from "@local/validators";
 
 // State
 import { type FunctionState } from "@local/state";
-import { expireTokenStep } from "../steps/services/expire_token.step.ts";
+import { expireTokenStep } from "@local/steps/services/expire_token.step.ts";
 
 export const signOutChain = chain<
   SignOutBody,

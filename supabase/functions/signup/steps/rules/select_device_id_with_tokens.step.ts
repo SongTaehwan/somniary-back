@@ -3,15 +3,15 @@ import { Step } from "@shared/core/chain.ts";
 import { selectInputBody } from "@shared/state/selectors/index.ts";
 
 // State
-import { AuthTokens, FunctionState } from "@local/state/state.types.ts";
-import { AuthVerifyInput } from "@local/validators/validator.ts";
+import { AuthTokens, FunctionState } from "@local/state/index.ts";
+import { SignUpBody } from "@local/validators";
 
 export const selectDeviceIdWithTokens: Step<
   AuthTokens,
   { device_id: string; access_token: string; refresh_token: string },
-  AuthVerifyInput,
+  SignUpBody,
   unknown,
-  FunctionState<AuthVerifyInput>
+  FunctionState<SignUpBody>
 > = ({ access_token, refresh_token }, ctx) => {
   const body = selectInputBody(ctx);
 

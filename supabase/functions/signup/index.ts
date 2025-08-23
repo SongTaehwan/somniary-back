@@ -2,35 +2,30 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 // Shared
 import { methodGuard } from "@shared/adapters/http/middlewares/method_guard.middleware.ts";
-import { CONTENT_TYPES } from "@shared/adapters/http/error/constant.ts";
+import { HttpResponse } from "@shared/adapters/http/error/response.ts";
 import { compose } from "@shared/core/compose.ts";
 
 // Validators
-import { AuthVerifyInput } from "@local/validators/validator.ts";
+import { SignUpBody } from "@local/validators";
 
 // State
-import { FunctionState } from "@local/state/state.types.ts";
-import { selectAuthData } from "@local/state/selectors/selectors.ts";
+import { FunctionState } from "@local/state/index.ts";
+import { selectAuthData } from "@local/state/selectors/index.ts";
 
 // Chains
-import { tokenResignChain } from "@local/usecases/usecases.ts";
+import { signUpChain } from "@local/usecases";
 
 // 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
 Deno.serve(
-  compose<AuthVerifyInput, unknown, FunctionState<AuthVerifyInput>>(
-    [methodGuard(["POST"]), tokenResignChain.toMiddleware()],
+  compose<SignUpBody, unknown, FunctionState<SignUpBody>>(
+    [methodGuard(["POST"]), signUpChain.toMiddleware()],
     (ctx) => {
       const { access_token, refresh_token } = selectAuthData(ctx);
 
-      return new Response(
-        JSON.stringify({
-          access_token,
-          refresh_token,
-        }),
-        {
-          headers: { "Content-Type": CONTENT_TYPES.JSON },
-        }
-      );
+      return HttpResponse.message(200, {
+        access_token,
+        refresh_token,
+      });
     }
   )
 );
