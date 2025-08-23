@@ -8,7 +8,7 @@ else
 fi
 
 # 모두 소문자로 바꾸고 단어 단위 분리
-words=$(echo "$input" | tr '[:upper:]' '[:lower:]')
+words=$(echo "$input" | tr '[:upper:]' '[:lower:]' | tr '_' ' ')
 
 # 모든 단어의 첫 글자 대문자 + 나머지 소문자
 pascal=$(echo $words | awk '{

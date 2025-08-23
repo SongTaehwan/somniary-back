@@ -36,7 +36,7 @@ const querySchema = z.object({
 export type ${PASCAL_FUNC_NAME}Body = z.infer<typeof bodySchema>;
 export type ${PASCAL_FUNC_NAME}Query = z.infer<typeof querySchema>;
 
-export const validateBodyStep = parseInputStep({
+export const validateStep = parseInputStep({
   bodyParser: createValidator(bodySchema),
   queryParser: createValidator(querySchema),
 });
@@ -81,7 +81,7 @@ import { type Input } from "@shared/types/state.types.ts";
 import { 
   type ${PASCAL_FUNC_NAME}Body, 
   type ${PASCAL_FUNC_NAME}Query, 
-  validateBodyStep,
+  validateStep,
 } from "@local/validators";
 
 // State
@@ -92,7 +92,7 @@ export const usecase = chain<
   ${PASCAL_FUNC_NAME}Query,
   FunctionState<${PASCAL_FUNC_NAME}Body, ${PASCAL_FUNC_NAME}Query>,
   Input<${PASCAL_FUNC_NAME}Body, ${PASCAL_FUNC_NAME}Query>
->(validateBodyStep);
+>(validateStep);
 
 EOF
 

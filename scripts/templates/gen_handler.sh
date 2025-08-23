@@ -17,7 +17,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 // Shared
 import { compose } from "@shared/core/compose.ts";
 import { methodGuard } from "@shared/adapters/http/middlewares/method_guard.middleware.ts";
-import { CONTENT_TYPES } from "@shared/adapters/http/error/constant.ts";
+import { CONTENT_TYPES } from "@shared/adapters/http/format/constant.ts";
 
 // Validators
 import { type ${PASCAL_FUNC_NAME}Body, type ${PASCAL_FUNC_NAME}Query } from "@local/validators";
