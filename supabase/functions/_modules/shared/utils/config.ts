@@ -22,6 +22,20 @@ class AppConfiguration {
     return env as AppEnvironment;
   }
 
+  private get jwtSecret(): string {
+    const secret = Deno.env.get("JWT_SECRET");
+
+    if (!secret) {
+      throw new Error("JWT_SECRET is not set", { cause: "JWT_SECRET_NOT_SET" });
+    }
+
+    return secret;
+  }
+
+  public getJwtSecret(): string {
+    return this.jwtSecret;
+  }
+
   public get isProduction(): boolean {
     return this.env === AppEnvironment.PRODUCTION;
   }

@@ -1,6 +1,7 @@
 // Shared
 import { supabase } from "@shared/infra/supabase.ts";
 import { parseInputStep } from "@shared/adapters/http/steps/parse_input.step.ts";
+import { AppConfig } from "@shared/utils/config.ts";
 import { chain } from "@shared/core/chain.ts";
 
 // Types
@@ -50,8 +51,6 @@ const deviceSessionChain = authVerificationChain.then(selectDeviceIdWithTokens);
 // 5. 엑세스 토큰 & 리프레시 토큰 반환
 export const signUpChain = deviceSessionChain
   .then(
-    resignJwtWithDeviceIdStep(
-      createJwtDependencies(Deno.env.get("JWT_SECRET") ?? "")
-    )
+    resignJwtWithDeviceIdStep(createJwtDependencies(AppConfig.getJwtSecret()))
   )
   .tap(storeAuthData());
