@@ -58,7 +58,7 @@ export class ChainBuilder<
 
   static start<Body, Query, State extends RouteState<Body, Query>, Acc>(
     first: FirstStep<Acc, Body, Query, State>,
-    options: ChainBuilderOptions
+    options?: ChainBuilderOptions
   ): ChainBuilder<Body, Query, State, Acc> {
     return new ChainBuilder(first, options);
   }
@@ -273,7 +273,7 @@ export class ChainBuilder<
 
 export function chain<Body, Query, State extends RouteState<Body, Query>, Acc>(
   first: FirstStep<Acc, Body, Query, State>,
-  options: ChainBuilderOptions
+  options?: ChainBuilderOptions
 ): ChainBuilder<Body, Query, State, Acc> {
   return ChainBuilder.start(first, options);
 }
