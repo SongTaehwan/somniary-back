@@ -9,7 +9,7 @@ type TaskSuccess<T> = { success: true; failed: false; value: T };
 type TaskFailed = {
   success: false;
   failed: true;
-  error: Error & { cause: string };
+  error: Error;
 };
 
 type TaskOptions = {
@@ -74,13 +74,13 @@ export async function task<T>(
     const error = toError(err);
 
     if (throwError) {
-      throw Object.assign(error, { cause: labelForError });
+      throw Object.assign(error, { cause: error.cause ?? labelForError });
     }
 
     return {
       success: false,
       failed: true,
-      error: Object.assign(error, { cause: labelForError }),
+      error: Object.assign(error, { cause: error.cause ?? labelForError }),
     };
   }
 }
