@@ -3,24 +3,63 @@ import { toError } from "../adapters/http/format/normalize.ts";
 type Task<T> = Promise<T> | T;
 type Thunk<T> = () => Task<T>;
 
-type TaskResult<T> =
-  | { success: true; failed: false; value: T }
-  | { success: false; failed: true; error: Error };
+export type TaskResult<T> = TaskSuccess<T> | TaskFailed;
 
+type TaskSuccess<T> = { success: true; failed: false; value: T };
+type TaskFailed = {
+  success: false;
+  failed: true;
+  error: Error & { cause: string };
+};
+
+type TaskOptions = {
+  labelForError?: string;
+  throwError?: boolean;
+};
+
+// handle error manually in general
 export async function task<T>(
   task: Thunk<T>,
-  labelForError?: string
+  options?: {
+    labelForError?: string;
+    throwError?: false;
+  }
 ): Promise<TaskResult<T>>;
 
 export async function task<T>(
   task: Task<T>,
-  labelForError?: string
+  options?: {
+    labelForError?: string;
+    throwError?: false;
+  }
 ): Promise<TaskResult<T>>;
+
+// throw error if failed and return success  if not
+export async function task<T>(
+  task: Thunk<T>,
+  options?: {
+    labelForError?: string;
+    throwError?: true;
+  }
+): Promise<TaskSuccess<T>>;
+
+export async function task<T>(
+  task: Task<T>,
+  options?: {
+    labelForError?: string;
+    throwError?: true;
+  }
+): Promise<TaskSuccess<T>>;
 
 export async function task<T>(
   task: Thunk<T> | Task<T>,
-  labelForError: string = "task"
+  options: TaskOptions = {
+    labelForError: "task",
+    throwError: false,
+  }
 ): Promise<TaskResult<T>> {
+  const { labelForError = "task", throwError } = options;
+
   try {
     const value = await (typeof task === "function"
       ? (task as Thunk<T>)()
@@ -33,6 +72,10 @@ export async function task<T>(
     };
   } catch (err) {
     const error = toError(err);
+
+    if (throwError) {
+      throw Object.assign(error, { cause: labelForError });
+    }
 
     return {
       success: false,
