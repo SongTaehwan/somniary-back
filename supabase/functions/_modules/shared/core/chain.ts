@@ -58,7 +58,7 @@ export class ChainBuilder<
     });
   }
 
-  // 직전 단계와 다음 단계의 결과를 병합합니다.
+  // 직전 단계와 다음 단계의 결과를 사용자가 직접 병합합니다.
   merge<Next, R>(
     nextStep: Step<Acc, Next, Body, Query, State>,
     mergeFn: (previousStep: Acc, nextStepResult: Next) => R | Promise<R>
@@ -67,6 +67,30 @@ export class ChainBuilder<
       const previousStep = await this.run(ctx);
       const nextStepResult = await nextStep(ctx, previousStep);
       return mergeFn(previousStep, nextStepResult);
+    });
+  }
+
+  // 직전 단계와 다음 단계의 결과를 그대로 병합합니다.
+  mergeWith<Next>(
+    nextStep: Step<Acc, Next, Body, Query, State>
+  ): ChainBuilder<Body, Query, State, Acc & Next> {
+    return new ChainBuilder(async (ctx) => {
+      const previousStep = await this.run(ctx);
+      const nextStepResult = await nextStep(ctx, previousStep);
+      return {
+        ...previousStep,
+        ...nextStepResult,
+      };
+    });
+  }
+
+  // 직전 단계의 결과를 변환합니다.
+  map<R>(
+    mapFn: (previousStep: Acc) => R | Promise<R>
+  ): ChainBuilder<Body, Query, State, R> {
+    return new ChainBuilder(async (ctx) => {
+      const previousStep = await this.run(ctx);
+      return mapFn(previousStep);
     });
   }
 
