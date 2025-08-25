@@ -1,5 +1,6 @@
 import { Step } from "@shared/core/chain.ts";
-import { SupabaseClient } from "jsr:@supabase/supabase-js";
+import { SupabaseClient } from "@shared/infra/supabase.ts";
+import { HttpException } from "@shared/adapters/http/format/exception.ts";
 
 // Validators
 import {
@@ -7,7 +8,7 @@ import {
   type RefreshTokenQuery,
 } from "@local/validators";
 
-import { HttpException } from "@shared/adapters/http/format/exception.ts";
+// Auth
 import { AuthState } from "@auth/state/index.ts";
 
 export const refreshTokenStep = (

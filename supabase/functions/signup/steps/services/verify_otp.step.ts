@@ -1,8 +1,7 @@
-import { SupabaseClient } from "jsr:@supabase/supabase-js";
-
 // Shared
 import { type Step } from "@shared/core/chain.ts";
 import { HttpException } from "@shared/adapters/http/format/exception.ts";
+import { SupabaseClient } from "@shared/infra/supabase.ts";
 
 // State
 import { type AuthState } from "@auth/state/index.ts";
@@ -21,11 +20,11 @@ export const verifyOtp = (
   unknown,
   AuthState<SignUpBody>
 > => {
-  return async (ctx, { otpToken, email }) => {
+  return async (ctx, { otpToken: token, email }) => {
     const { data, error } = await supabase.auth.verifyOtp({
-      token: otpToken,
+      token,
       email,
-      type: "magiclink",
+      type: "email",
     });
 
     if (error) {

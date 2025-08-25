@@ -8,7 +8,7 @@ import {
 } from "../../../types/parser.type.ts";
 import { type Input, type RouteState } from "../../../types/state.types.ts";
 
-export const parseInputStep = <
+export function parseInputStep<
   Body,
   Query,
   State extends RouteState<Body, Query>
@@ -18,7 +18,7 @@ export const parseInputStep = <
 }: {
   bodyParser?: BodyParser<Body>;
   queryParser?: QueryParser<Query>;
-}): FirstStep<Input<Body, Query>, Body, Query, State> => {
+}): FirstStep<Input<Body, Query>, Body, Query, State> {
   return async (ctx): Promise<Input<Body, Query>> => {
     const headers = ctx.request.headers;
     let body: Body | undefined = undefined;
@@ -64,4 +64,4 @@ export const parseInputStep = <
       body,
     };
   };
-};
+}
