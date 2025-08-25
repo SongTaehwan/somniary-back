@@ -7,9 +7,15 @@ import { type AuthState } from "@auth/state/index.ts";
 import { type AuthTokens } from "@auth/state/index.ts";
 import { type SignUpBody } from "@local/validators";
 
+type Output = {
+  device_id: string;
+  access_token: string;
+  refresh_token: string;
+};
+
 export const selectDeviceIdWithTokens: Step<
   AuthTokens,
-  { device_id: string; access_token: string; refresh_token: string },
+  Output,
   SignUpBody,
   unknown,
   AuthState<SignUpBody>

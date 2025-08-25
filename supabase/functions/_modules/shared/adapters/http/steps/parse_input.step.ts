@@ -26,7 +26,9 @@ export const parseInputStep = <
     if (bodyParser) {
       const parsingTask = await task<Body>(
         bodyParser(await ctx.request.json()),
-        "parseInputStep_parse_body"
+        {
+          labelForError: "parseInputStep_parse_body",
+        }
       );
 
       if (parsingTask.failed) {
@@ -44,10 +46,9 @@ export const parseInputStep = <
     if (queryParser) {
       const url = new URL(ctx.request.url);
 
-      const parsingTask = await task<Query>(
-        queryParser(url.searchParams),
-        "parseInputStep_parse_query"
-      );
+      const parsingTask = await task<Query>(queryParser(url.searchParams), {
+        labelForError: "parseInputStep_parse_query",
+      });
 
       if (parsingTask.failed) {
         ctx.response = HttpException.badRequest("invalid query");

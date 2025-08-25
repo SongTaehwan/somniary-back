@@ -23,10 +23,9 @@ export const parseInputMiddleware = <
     let body: unknown = undefined;
 
     if (bodyParser) {
-      const parsingTask = await task(
-        bodyParser(await ctx.request.json()),
-        "parseInputMiddleware_parse_body"
-      );
+      const parsingTask = await task(bodyParser(await ctx.request.json()), {
+        labelForError: "parseInputMiddleware_parse_body",
+      });
 
       if (parsingTask.failed) {
         ctx.response = HttpException.badRequest("invalid payload");
@@ -39,10 +38,9 @@ export const parseInputMiddleware = <
     let query: Query | undefined = undefined;
 
     if (queryParser) {
-      const parsingTask = await task(
-        queryParser(url.searchParams),
-        "parseInputMiddleware_parse_query"
-      );
+      const parsingTask = await task(queryParser(url.searchParams), {
+        labelForError: "parseInputMiddleware_parse_query",
+      });
 
       if (parsingTask.failed) {
         ctx.response = HttpException.badRequest("invalid query");
