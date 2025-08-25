@@ -21,7 +21,7 @@ export const verifyOtp = (
   unknown,
   AuthState<SignUpBody>
 > => {
-  return async ({ otpToken, email }, ctx) => {
+  return async (ctx, { otpToken, email }) => {
     const { data, error } = await supabase.auth.verifyOtp({
       token: otpToken,
       email,

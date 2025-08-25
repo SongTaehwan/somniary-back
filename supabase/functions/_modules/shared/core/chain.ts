@@ -12,7 +12,7 @@ export type Step<
   Body = unknown,
   Query = unknown,
   State extends RouteState<Body, Query> = RouteState<Body, Query>
-> = (input: In, ctx: Context<Body, Query, State>) => Promise<Out> | Out;
+> = (ctx: Context<Body, Query, State>, input: In) => Promise<Out> | Out;
 
 // 인풋을 받지 않는 첫 단계
 export type FirstStep<
@@ -28,7 +28,7 @@ export type SideEffect<
   Body = unknown,
   Query = unknown,
   State extends RouteState<Body, Query> = RouteState<Body, Query>
-> = (value: Acc, ctx: Context<Body, Query, State>) => Promise<void> | void;
+> = (ctx: Context<Body, Query, State>, value: Acc) => Promise<void> | void;
 
 // Fluent builder for arbitrary-length typed pipelines
 export class ChainBuilder<
@@ -49,14 +49,24 @@ export class ChainBuilder<
     return new ChainBuilder(first);
   }
 
-  // then: 직전 단계의 반환값(Acc)을 다음 단계의 입력으로 전달합니다.
-  // 예) 1단계 Out → 2단계 In, 2단계 Out → 3단계 In ... 으로 연쇄됩니다.
   then<Next>(
     nextStep: Step<Acc, Next, Body, Query, State>
   ): ChainBuilder<Body, Query, State, Next> {
     return new ChainBuilder(async (ctx) => {
       const previousStep = await this.run(ctx);
-      return nextStep(previousStep, ctx);
+      return nextStep(ctx, previousStep);
+    });
+  }
+
+  // 직전 단계와 다음 단계의 결과를 병합합니다.
+  merge<Next, R>(
+    nextStep: Step<Acc, Next, Body, Query, State>,
+    mergeFn: (previousStep: Acc, nextStepResult: Next) => R | Promise<R>
+  ): ChainBuilder<Body, Query, State, R> {
+    return new ChainBuilder(async (ctx) => {
+      const previousStep = await this.run(ctx);
+      const nextStepResult = await nextStep(ctx, previousStep);
+      return mergeFn(previousStep, nextStepResult);
     });
   }
 
@@ -67,7 +77,7 @@ export class ChainBuilder<
   ): ChainBuilder<Body, Query, State, Acc> {
     return new ChainBuilder(async (ctx) => {
       const value = await this.run(ctx);
-      await fn(value, ctx);
+      await fn(ctx, value);
       return value;
     });
   }

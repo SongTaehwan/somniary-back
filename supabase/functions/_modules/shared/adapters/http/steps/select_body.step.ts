@@ -10,7 +10,7 @@ export function selectBodyStep<
   Query,
   State extends RouteState<Body, Query>
 >(): Step<Input<Body, Query>, Body, Body, Query, State> {
-  return (input, ctx) => {
+  return (ctx, input) => {
     const body = input.body;
 
     if (!body) {

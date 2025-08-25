@@ -14,6 +14,6 @@ export const storeInput: SideEffect<
   SignUpBody,
   unknown,
   AuthState<SignUpBody>
-> = (input, ctx) => {
+> = (ctx, input) => {
   State.setInput(ctx, input);
 };

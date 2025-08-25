@@ -12,7 +12,7 @@ export const selectTokenHash: Step<
   SignUpBody,
   unknown,
   AuthState<SignUpBody>
-> = (input, _ctx) => {
+> = (_ctx, input) => {
   const otpToken = input.body?.otp_token;
   const email = input.body?.email;
 

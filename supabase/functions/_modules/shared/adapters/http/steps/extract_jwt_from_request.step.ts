@@ -3,7 +3,7 @@ import { FirstStep } from "../../../core/chain.ts";
 import { RouteState } from "../../../types/state.types.ts";
 
 export type Token = {
-  value: string;
+  token: string;
   type: string;
 };
 
@@ -20,10 +20,10 @@ export const extractJwtFromRequest = <
       throw HttpException.unauthorized("required authorization header");
     }
 
-    const [type, value] = property.split(" ");
+    const [type, token] = property.split(" ");
 
     return {
-      value,
+      token,
       type,
     };
   };

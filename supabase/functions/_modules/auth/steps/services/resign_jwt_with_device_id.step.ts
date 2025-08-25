@@ -26,7 +26,7 @@ export const resignJwtWithDeviceIdStep = <
   Query,
   State
 > => {
-  return async ({ device_id, access_token, refresh_token }, ctx) => {
+  return async (ctx, { device_id, access_token, refresh_token }) => {
     // 1) 기존 access_token 검증
     const verifyTask = await task(
       dependency.verify(access_token),

@@ -13,7 +13,7 @@ export const selectDeviceIdWithTokens: Step<
   SignUpBody,
   unknown,
   AuthState<SignUpBody>
-> = ({ access_token, refresh_token }, ctx) => {
+> = (ctx, { access_token, refresh_token }) => {
   const body = selectInputBody(ctx);
 
   return {

@@ -8,8 +8,8 @@ import { HttpException } from "@shared/adapters/http/format/exception.ts";
 export const expireTokenStep = (
   supabase: SupabaseClient
 ): Step<Token, void, unknown, unknown, FunctionState<unknown>> => {
-  return async (token, ctx) => {
-    const result = await supabase.auth.admin.signOut(token.value, "local");
+  return async (ctx, { token }) => {
+    const result = await supabase.auth.admin.signOut(token, "local");
 
     if (result.error) {
       ctx.response = HttpException.internalError("Failed to expire token");

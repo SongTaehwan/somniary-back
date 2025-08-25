@@ -11,7 +11,7 @@ export function storeAuthData<Body, Query>(): SideEffect<
   Query,
   AuthState<Body, Query>
 > {
-  return (auth, ctx) => {
+  return (ctx, auth) => {
     State.setAuthData(ctx, auth);
   };
 }
