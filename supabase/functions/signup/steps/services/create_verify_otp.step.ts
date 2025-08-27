@@ -10,6 +10,12 @@ import { type AuthTokens } from "@auth/state/index.ts";
 // Validator
 import { type SignUpBody } from "@local/validators";
 
+const SAFE_ERROR_MESSAGES = {
+  INVALID_OTP: "인증 코드가 올바르지 않습니다",
+  EXPIRED_OTP: "인증 코드가 만료되었습니다",
+  SESSION_ERROR: "인증 처리 중 오류가 발생했습니다",
+};
+
 // OTP 검증 후 토큰 데이터 반환
 export const createVerifyOtpStep = (
   supabase: SupabaseClient
@@ -29,14 +35,16 @@ export const createVerifyOtpStep = (
 
     if (error) {
       // 클라이언트 응답 + 프로세스 중단
-      ctx.response = HttpException.badRequest(error.message);
+      ctx.response = HttpException.badRequest(SAFE_ERROR_MESSAGES.INVALID_OTP);
       throw new Error(error.message);
     }
 
     if (!data.session) {
       // 클라이언트 응답 + 프로세스 중단
-      ctx.response = HttpException.internalError("session_not_found");
-      throw new Error("session_not_found");
+      ctx.response = HttpException.internalError(
+        SAFE_ERROR_MESSAGES.SESSION_ERROR
+      );
+      throw new Error(SAFE_ERROR_MESSAGES.SESSION_ERROR);
     }
 
     return {
