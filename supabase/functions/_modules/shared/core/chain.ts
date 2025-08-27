@@ -1,9 +1,16 @@
-import { Middleware } from "../types/middleware.types.ts";
+// Types
+import { type Middleware } from "../types/middleware.types.ts";
+import { type Context } from "../types/context.types.ts";
+import { type RouteState } from "../types/state.types.ts";
+
+// Adapters
 import { HttpException } from "../adapters/http/format/exception.ts";
-import { Context } from "../types/context.types.ts";
 import { toError } from "../adapters/http/format/normalize.ts";
-import { RouteState } from "../types/state.types.ts";
+
+// State
 import { Selector } from "../state/selectors/selectors.types.ts";
+
+// Utils
 import { task, TaskResult } from "../utils/task.ts";
 
 // Variadic pipeline step: first(ctx) → step(prev, ctx) → ...
@@ -83,11 +90,10 @@ export class ChainBuilder<
     );
   }
 
-  // 직전 단계와 다음 단계의 결과를 사용자가 직접 병합합니다.
-  merge<Next, R>(
+  zipWith<Next, R>(
     nextStep: Step<Acc, Next, Body, Query, State>,
-    mergeFn: (previousStep: Acc, nextStepResult: Next) => R | Promise<R>,
-    label: string = "Anonymous Merge Step"
+    combiner: (previousStep: Acc, nextStepResult: Next) => R | Promise<R>,
+    label: string = "Anonymous Zip With Step"
   ): ChainBuilder<Body, Query, State, R> {
     return new ChainBuilder(
       async (ctx) => {
@@ -103,41 +109,7 @@ export class ChainBuilder<
         });
 
         this.logTask(nextStepResult, label);
-
-        return mergeFn(previousStep.value, nextStepResult.value);
-      },
-      {
-        debugMode: this.debugMode,
-        debugLabel: this.debugLabel,
-      }
-    );
-  }
-
-  // 직전 단계와 다음 단계의 결과를 그대로 병합합니다.
-  mergeWith<Next>(
-    nextStep: Step<Acc, Next, Body, Query, State>,
-    label: string = "Anonymous Merge With Step"
-  ): ChainBuilder<Body, Query, State, Acc & Next> {
-    return new ChainBuilder(
-      async (ctx) => {
-        const previousStep = await task(this.run(ctx), {
-          labelForError: label,
-          throwError: true,
-        });
-
-        this.logTask(previousStep, label);
-
-        const nextStepResult = await task(nextStep(ctx, previousStep.value), {
-          labelForError: label,
-          throwError: true,
-        });
-
-        this.logTask(nextStepResult, label);
-
-        return {
-          ...previousStep.value,
-          ...nextStepResult.value,
-        };
+        return combiner(previousStep.value, nextStepResult.value);
       },
       {
         debugMode: this.debugMode,

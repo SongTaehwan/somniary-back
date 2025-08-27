@@ -1,33 +1,32 @@
 // Shared
-import { supabase } from "@shared/infra/supabase.ts";
-import { parseInputStep } from "@shared/adapters/http/steps/parse_input.step.ts";
-import { AppConfig } from "@shared/utils/config.ts";
 import { chain } from "@shared/core/chain.ts";
+import { supabase } from "@shared/infra/supabase.ts";
+import { AppConfig } from "@shared/utils/config.ts";
+import { selectInputBody } from "@shared/state/selectors/index.ts";
+import { parseInputStep } from "@shared/adapters/http/steps/parse_input.step.ts";
 
 // Types
 import { type Input } from "@shared/types/state.types.ts";
 
 // Steps
-import { verifyOtp } from "@local/steps/services/verify_otp.step.ts";
+import { createVerifyOtpStep } from "../steps/services/create_verify_otp.step.ts";
 import { storeInput } from "@local/steps/effects/store_input.effect.ts";
 
 // Auth
-import { resignJwtWithDeviceIdStep } from "@auth/steps/services/resign_jwt_with_device_id.step.ts";
+import { createResignJwtWithDeviceIdStep } from "@auth/steps/services/create_resign_jwt_with_device_id.step.ts";
 import { storeAuthData } from "@auth/steps/rules/store_auth_data.ts";
-
-// Domain
-import { selectTokenHash } from "@local/steps/rules/select_token_hash.step.ts";
-import { selectDeviceIdWithTokens } from "@local/steps/rules/select_device_id_with_tokens.step.ts";
-
-// Validators
-import { type SignUpBody, validateInput } from "@local/validators";
 import { type AuthState } from "@auth/state/index.ts";
 import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
-// 클라이언트로 부터 device_id, token hash 를 받아 인증 완료 처리 및 토큰 발급한다.
+// Validators
+import { type SignUpBody, validateInput } from "@local/validators";
+import { createDeviceSessionStep } from "../steps/services/create_device_session.step.ts";
+import { createGetUserStep } from "../steps/services/create_get_user.step.ts";
 
-// 1. 앱에서 POST 요청 시 device_id, token hash 를 받는다.
-const requestInputParsingChain = chain<
+// 클라이언트로 부터 device_id, otp_token 등을 받아 인증 완료 처리 및 토큰 발급한다.
+
+// 1. 앱에서 POST 요청 시 body 를 파싱하고 공유 상태에 저장한다.
+const parseRequestInput = chain<
   SignUpBody,
   unknown,
   AuthState<SignUpBody>,
@@ -36,21 +35,44 @@ const requestInputParsingChain = chain<
   parseInputStep({
     bodyParser: validateInput,
   })
-).tap(storeInput);
+)
+  // 공유 상태에 body 정보 저장
+  .tap(storeInput);
 
-// 2. 토큰 해시 검증 및 토큰 발급한다.
-const authVerificationChain = requestInputParsingChain
-  .then(selectTokenHash)
-  .then(verifyOtp(supabase));
+// 2. 사용자 인증 처리 및 토큰 발급
+const verifyAuthentication = parseRequestInput
+  .then(selectInputBody)
+  .then(createVerifyOtpStep(supabase));
 
-// 3. device_sessions 레코드 추가
-// TODO: 레코드 추가
-const deviceSessionChain = authVerificationChain.then(selectDeviceIdWithTokens);
-
-// 4. JWT claim 을 추가한다.
-// 5. 엑세스 토큰 & 리프레시 토큰 반환
-export const signUpChain = deviceSessionChain
+// 3. device_id 를 JWT claim 에 추가하고 공유 상태에 저장한다.
+const resignJwt = verifyAuthentication
+  // 3.1 JWT 토큰 재서명을 위한 데이터 구성
+  .zipWith(selectInputBody, (tokens, body) => ({
+    access_token: tokens.access_token,
+    refresh_token: tokens.refresh_token,
+    device_id: body.device_id,
+  }))
   .then(
-    resignJwtWithDeviceIdStep(createJwtDependencies(AppConfig.getJwtSecret()))
+    createResignJwtWithDeviceIdStep(
+      createJwtDependencies(AppConfig.getJwtSecret())
+    )
   )
+  // 4. 엑세스 토큰 & 리프레시 토큰 저장 및 반환
   .tap(storeAuthData());
+
+const insertDeviceSession = resignJwt
+  // 5. 사용자 id 조회 & 반환
+  .then(createGetUserStep(supabase))
+  .zipWith(
+    selectInputBody,
+    // 디바이스 세션 테이블 삽입을 위한 데이터 구성
+    (user, body) => ({
+      user_id: user.id,
+      platform: body.platform,
+      device_id: body.device_id,
+    })
+  )
+  // 6. device_sessions 레코드 생성
+  .then(createDeviceSessionStep(supabase));
+
+export const signUpChain = insertDeviceSession;
