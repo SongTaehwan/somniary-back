@@ -35,10 +35,11 @@ export const refreshTokenChain = chain<
   .then(selectBodyStep(), "select_body_step")
   // TODO: device_id 검증 단계 필요
   .then(refreshTokenStep(supabase), "refresh_token_step")
-  .then(
-    createResignJwtWithDeviceIdStep(
-      createJwtDependencies(Deno.env.get("JWT_SECRET") ?? "")
-    ),
+  .lazyThen(
+    (_ctx, _input) =>
+      createResignJwtWithDeviceIdStep(
+        createJwtDependencies(AppConfig.getJwtSecret())
+      ),
     "resign_jwt_with_device_id_step"
   )
   .then(storeAuthData(), "store_auth_data_step");

@@ -90,6 +90,33 @@ export class ChainBuilder<
     );
   }
 
+  // 지연 평가: Step 생성을 실행 시점까지 지연시켜 런타임 의존성 관리
+  lazyThen<Next>(
+    stepFactory: (
+      ctx: Context<Body, Query, State>,
+      input: Acc
+    ) => Step<Acc, Next, Body, Query, State>,
+    label: string = "Anonymous Lazy Step"
+  ): ChainBuilder<Body, Query, State, Next> {
+    return new ChainBuilder(
+      async (ctx) => {
+        const previousStep = await task(this.run(ctx), {
+          labelForError: label,
+          throwError: true,
+        });
+        this.logTask(previousStep, label);
+
+        // 실행 시점에 Step 생성 및 실행
+        const dynamicStep = stepFactory(ctx, previousStep.value);
+        return dynamicStep(ctx, previousStep.value);
+      },
+      {
+        debugMode: this.debugMode,
+        debugLabel: this.debugLabel,
+      }
+    );
+  }
+
   zipWith<Next, R>(
     nextStep: Step<Acc, Next, Body, Query, State>,
     combiner: (previousStep: Acc, nextStepResult: Next) => R | Promise<R>,
