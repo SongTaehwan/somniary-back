@@ -64,7 +64,7 @@ const resignJwt = verifyAuthentication
     "resign_jwt_with_device_id_step"
   )
   // 4. 엑세스 토큰 & 리프레시 토큰 저장 및 반환
-  .tap(storeAuthData());
+  .tap(storeAuthData);
 
 const insertDeviceSession = resignJwt
   // 5. 사용자 id 조회 & 반환

@@ -1,17 +1,15 @@
-import { type SideEffect } from "../../../shared/core/chain.ts";
+import { type Context } from "../../../shared/types/context.types.ts";
+import { type RouteState } from "../../../shared/types/state.types.ts";
 
 // State
-import { type AuthState } from "../../state/index.ts";
 import { type AuthTokens } from "../../state/index.ts";
 import { State } from "../../state/selectors/index.ts";
 
-export function storeAuthData<Body, Query>(): SideEffect<
-  AuthTokens,
+export function storeAuthData<
+  Acc extends AuthTokens,
   Body,
   Query,
-  AuthState<Body, Query>
-> {
-  return (ctx, auth) => {
-    State.setAuthData(ctx, auth);
-  };
+  State extends RouteState<Body, Query> = RouteState<Body, Query>
+>(ctx: Context<Body, Query, State>, value: Acc): void {
+  State.setAuthData(ctx, value);
 }

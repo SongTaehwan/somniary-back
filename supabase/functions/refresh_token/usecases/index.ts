@@ -42,4 +42,4 @@ export const refreshTokenChain = chain<
       ),
     "resign_jwt_with_device_id_step"
   )
-  .then(storeAuthData(), "store_auth_data_step");
+  .then(storeAuthData, "store_auth_data_step");
