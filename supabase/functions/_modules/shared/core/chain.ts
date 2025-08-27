@@ -12,6 +12,7 @@ import { Selector } from "../state/selectors/selectors.types.ts";
 
 // Utils
 import { task, TaskResult } from "../utils/task.ts";
+import { maskSensitiveData } from "../utils/security.ts";
 
 // Variadic pipeline step: first(ctx) → step(prev, ctx) → ...
 export type Step<
@@ -257,9 +258,11 @@ export class ChainBuilder<
     }
 
     if (taskResult.success) {
+      // 민감한 데이터를 마스킹하여 로깅
+      const maskedValue = this.maskLogData(taskResult.value);
       console.log(
         `[${this.debugLabel}_${label}] task success\n`,
-        JSON.stringify(taskResult.value, null, 4)
+        JSON.stringify(maskedValue, null, 4)
       );
     } else {
       console.log(
@@ -267,6 +270,20 @@ export class ChainBuilder<
         JSON.stringify(taskResult.error, null, 4)
       );
     }
+  }
+
+  // 로깅 시 민감한 데이터 마스킹
+  private maskLogData<T>(data: T): T {
+    if (typeof data !== "object" || data === null) {
+      return data;
+    }
+
+    // 객체나 배열인 경우 민감 정보 마스킹
+    if (Array.isArray(data)) {
+      return data.map((item) => this.maskLogData(item)) as T;
+    }
+
+    return maskSensitiveData(data as Record<string, unknown>) as T;
   }
 }
 
