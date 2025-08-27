@@ -41,21 +41,25 @@ const parseRequestInput = chain<
   }
 )
   // 공유 상태에 body 정보 저장
-  .tap(storeInput);
+  .tap(storeInput, "store_input_step");
 
 // 2. 사용자 인증 처리 및 토큰 발급
-const verifyAuthentication = parseRequestInput
-  .then(selectInputBody)
+const verifyOtpToken = parseRequestInput
+  .then(selectInputBody, "select_input_body_step")
   .then(createVerifyOtpStep(supabase), "create_verify_otp_step");
 
 // 3. device_id 를 JWT claim 에 추가하고 공유 상태에 저장한다.
-const resignJwt = verifyAuthentication
+const resignJwtWithDeviceId = verifyOtpToken
   // 3.1 JWT 토큰 재서명을 위한 데이터 구성
-  .zipWith(selectInputBody, (tokens, body) => ({
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token,
-    device_id: body.device_id,
-  }))
+  .zipWith(
+    selectInputBody,
+    (tokens, body) => ({
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      device_id: body.device_id,
+    }),
+    "resign_jwt_with_device_id_step_input"
+  )
   .lazyThen(
     (_ctx, _input) =>
       createResignJwtWithDeviceIdStep(
@@ -64,9 +68,9 @@ const resignJwt = verifyAuthentication
     "resign_jwt_with_device_id_step"
   )
   // 4. 엑세스 토큰 & 리프레시 토큰 저장 및 반환
-  .tap(storeAuthData);
+  .tap(storeAuthData, "store_auth_data_step");
 
-const insertDeviceSession = resignJwt
+const insertDeviceSession = resignJwtWithDeviceId
   // 5. 사용자 id 조회 & 반환
   .then(createGetUserStep(supabase), "create_get_user_step")
   .zipWith(
@@ -76,7 +80,8 @@ const insertDeviceSession = resignJwt
       user_id: user.id,
       platform: body.platform,
       device_id: body.device_id,
-    })
+    }),
+    "create_device_session_data_step_input"
   )
   // 6. device_sessions 레코드 생성
   .then(createDeviceSessionStep(supabase), "create_device_session_step");
