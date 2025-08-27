@@ -13,7 +13,7 @@ import { type AuthTokens } from "../../state/index.ts";
 import { type RouteState } from "../../../shared/types/state.types.ts";
 import { type JwtClaims } from "../../types/index.ts";
 
-export const resignJwtWithDeviceIdStep = <
+export const createResignJwtWithDeviceIdStep = <
   Body,
   Query,
   State extends RouteState<Body, Query>

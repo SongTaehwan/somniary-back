@@ -11,16 +11,16 @@ import { type AuthTokens } from "@auth/state/index.ts";
 import { type SignUpBody } from "@local/validators";
 
 // OTP 검증 후 토큰 데이터 반환
-export const verifyOtp = (
+export const createVerifyOtpStep = (
   supabase: SupabaseClient
 ): Step<
-  { otpToken: string; email: string },
+  { otp_token: string; email: string },
   AuthTokens,
   SignUpBody,
   unknown,
   AuthState<SignUpBody>
 > => {
-  return async (ctx, { otpToken: token, email }) => {
+  return async (ctx, { otp_token: token, email }) => {
     const { data, error } = await supabase.auth.verifyOtp({
       token,
       email,

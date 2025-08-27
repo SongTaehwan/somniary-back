@@ -5,7 +5,7 @@ import { supabase } from "@shared/infra/supabase.ts";
 // Auth
 import { type AuthState } from "@auth/state/index.ts";
 import { createJwtDependencies } from "@auth/utils/jwt.ts";
-import { resignJwtWithDeviceIdStep } from "@auth/steps/services/resign_jwt_with_device_id.step.ts";
+import { createResignJwtWithDeviceIdStep } from "@auth/steps/services/create_resign_jwt_with_device_id.step.ts";
 import { storeAuthData } from "@auth/steps/rules/store_auth_data.ts";
 
 // Types
@@ -36,7 +36,7 @@ export const refreshTokenChain = chain<
   // TODO: device_id 검증 단계 필요
   .then(refreshTokenStep(supabase), "refresh_token_step")
   .then(
-    resignJwtWithDeviceIdStep(
+    createResignJwtWithDeviceIdStep(
       createJwtDependencies(Deno.env.get("JWT_SECRET") ?? "")
     ),
     "resign_jwt_with_device_id_step"
