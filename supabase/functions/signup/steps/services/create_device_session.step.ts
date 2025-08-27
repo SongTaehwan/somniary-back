@@ -22,11 +22,18 @@ export function createDeviceSessionStep(supabase: SupabaseClient): Step<
   return async (ctx, { device_id, user_id, platform }) => {
     const { data: deviceSession, error } = await supabase
       .from("device_sessions")
-      .insert({
-        device_id,
-        user_id,
-        platform,
-      })
+      // TODO: 중복 데이터 처리 로직 추가
+      .upsert(
+        {
+          device_id,
+          user_id,
+          platform,
+          session_id: crypto.randomUUID(),
+        },
+        {
+          ignoreDuplicates: false,
+        }
+      )
       .select()
       .single();
 
