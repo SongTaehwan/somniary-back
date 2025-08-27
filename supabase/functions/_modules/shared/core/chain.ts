@@ -219,6 +219,36 @@ export class ChainBuilder<
     );
   }
 
+  catch(
+    cleanUp: (
+      ctx: Context<Body, Query, State>,
+      error: Error
+    ) => Promise<void> | void,
+    label: string = "Anonymous Catch Step"
+  ): ChainBuilder<Body, Query, State, Acc> {
+    return new ChainBuilder(
+      async (ctx) => {
+        const result = await task(this.run(ctx), {
+          labelForError: label,
+        });
+
+        this.logTask(result, label);
+
+        if (result.success) {
+          return result.value;
+        }
+
+        // if failed, clean up
+        await cleanUp(ctx, result.error);
+        throw result.error;
+      },
+      {
+        debugMode: this.debugMode,
+        debugLabel: this.debugLabel,
+      }
+    );
+  }
+
   toMiddleware(): Middleware<Body, Query, State> {
     return async (ctx, next) => {
       try {
