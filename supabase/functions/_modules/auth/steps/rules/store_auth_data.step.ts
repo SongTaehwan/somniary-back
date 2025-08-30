@@ -5,7 +5,7 @@ import { type RouteState } from "../../../shared/types/state.types.ts";
 import { type AuthTokens } from "../../state/index.ts";
 import { State } from "../../state/selectors/index.ts";
 
-export function storeAuthData<
+export function storeAuthDataStep<
   Acc extends AuthTokens,
   Body,
   Query,

@@ -6,7 +6,7 @@ import { supabase } from "@shared/infra/supabase.ts";
 import { type AuthState } from "@auth/state/index.ts";
 import { createJwtDependencies } from "@auth/utils/jwt.ts";
 import { createResignJwtWithClaimsStep } from "@auth/steps/services/create_resign_jwt_with_claims.step.ts";
-import { storeAuthData } from "@auth/steps/rules/store_auth_data.ts";
+import { storeAuthDataStep } from "@auth/steps/rules/store_auth_data.step.ts";
 
 // Types
 import { type Input } from "@shared/types/state.types.ts";
@@ -21,7 +21,7 @@ import {
 // State
 import { refreshTokenStep } from "@local/steps/services/refresh_token.step.ts";
 import { AppConfig } from "@shared/utils/config.ts";
-import { selectRequestBodyStep } from "@shared/state/selectors/index.ts";
+import { selectRequestBodyStep } from "@shared/adapters/http/steps/select_request_input.step.ts";
 
 export const refreshTokenChain = chain<
   RefreshTokenBody,
@@ -52,4 +52,4 @@ export const refreshTokenChain = chain<
       ),
     "resign_jwt_with_claims_step"
   )
-  .then(storeAuthData, "store_auth_data_step");
+  .then(storeAuthDataStep, "store_auth_data_step");

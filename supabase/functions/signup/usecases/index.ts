@@ -2,7 +2,7 @@
 import { chain } from "@shared/core/chain.ts";
 import { supabase } from "@shared/infra/supabase.ts";
 import { AppConfig } from "@shared/utils/config.ts";
-import { selectRequestBodyStep } from "@shared/state/selectors/index.ts";
+import { selectRequestBodyStep } from "@shared/adapters/http/steps/select_request_input.step.ts";
 import { parseInputStep } from "@shared/adapters/http/steps/parse_input.step.ts";
 
 // Types
@@ -18,8 +18,8 @@ import { createHandleSignUpCompletionStep } from "@local/steps/services/create_h
 
 // Auth
 import { createResignJwtWithClaimsStep } from "@auth/steps/services/create_resign_jwt_with_claims.step.ts";
-import { storeAuthData } from "@auth/steps/rules/store_auth_data.ts";
-import { selectAuthData } from "@auth/state/selectors/index.ts";
+import { storeAuthDataStep } from "@auth/steps/rules/store_auth_data.step.ts";
+import { retrieveAuthDataStep } from "@auth/steps/rules/retrieve_auth_data.step.ts";
 import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
 // Validators
@@ -59,7 +59,7 @@ const verifyOtpToken = parseRequestInput
   // INFO: 멱등키를 적용하면 1회성 토큰의 중복 요청 방지됨
   // - 이후 작업의 실패로 토큰 재사용 불가 시 클라이언트단에서 토큰 재발급 시도하도록 유도
   .then(createVerifyOtpStep(supabase), "create_verify_otp_step")
-  .tap(storeAuthData, "store_auth_data_step");
+  .tap(storeAuthDataStep, "store_auth_data_step");
 
 // 3. 디바이스 세션 테이블 삽입
 const checkSignUpStatus = verifyOtpToken
@@ -107,7 +107,7 @@ const handleSignupCompletion = checkSignUpStatus.then(
 const processTokenSigning = handleSignupCompletion
   // 4.1 JWT 토큰 재서명을 위한 데이터 구성
   .zipWith(
-    selectAuthData,
+    retrieveAuthDataStep,
     (previousStep, currentStep) => {
       return {
         session_id: previousStep.deviceSession.session_id,
@@ -126,6 +126,6 @@ const processTokenSigning = handleSignupCompletion
     "process_token_signing"
   )
   // 4.2 엑세스 토큰 & 리프레시 토큰 저장 및 반환
-  .tap(storeAuthData, "store_auth_data_step");
+  .tap(storeAuthDataStep, "store_auth_data_step");
 
 export const signUpChain = processTokenSigning;

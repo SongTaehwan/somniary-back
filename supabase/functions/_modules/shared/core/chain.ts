@@ -7,9 +7,6 @@ import { type RouteState } from "../types/state.types.ts";
 import { HttpException } from "../adapters/http/format/exception.ts";
 import { toError } from "../adapters/http/format/normalize.ts";
 
-// State
-import { Selector } from "../state/selectors/selectors.types.ts";
-
 // Utils
 import { task, TaskResult } from "../utils/task.ts";
 import { maskSensitiveData } from "../utils/security.ts";
@@ -38,6 +35,10 @@ export type SideEffect<
   Query = unknown,
   State extends RouteState<Body, Query> = RouteState<Body, Query>
 > = (ctx: Context<Body, Query, State>, value: Acc) => Promise<void> | void;
+
+export type Selector<R, T, Q, S extends RouteState<T, Q>> = (
+  ctx: Context<T, Q, S>
+) => Promise<R> | R;
 
 type ChainBuilderOptions = {
   debugMode: boolean;
