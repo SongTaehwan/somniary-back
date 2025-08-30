@@ -25,6 +25,8 @@ export interface SignUpCompletionResult {
  * 1. 현재 디바이스로 재가입 (현재 디바이스 가입 이력 있음)
  * 2. 새로운 디바이스로 재가입 (다른 디바이스 가입 이력 있음)
  * 3. 현재 디바이스로 신규 가입 (모든 디바이스 가입 이력 없음)
+ *
+ * INFO: 차후 SMS, 이메일 인증 로직 추가 시 이 단계에서 처리 필요
  */
 export const createHandleSignUpCompletionStep = <
   Body,

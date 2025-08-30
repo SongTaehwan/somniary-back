@@ -13,8 +13,6 @@ import { type AuthState } from "@auth/state/index.ts";
 import { createVerifyOtpStep } from "@local/steps/services/create_verify_otp.step.ts";
 import { storeInput } from "@local/steps/effects/store_input.effect.ts";
 import { createGetUserStep } from "@local/steps/services/create_get_user.step.ts";
-import { createCheckSignUpStatusStep } from "@local/steps/services/create_check_signup_status.step.ts";
-import { createHandleSignUpCompletionStep } from "@local/steps/services/create_handle_signup_completion.step.ts";
 
 // Auth
 import { createResignJwtWithClaimsStep } from "@auth/steps/services/create_resign_jwt_with_claims.step.ts";
@@ -24,6 +22,7 @@ import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
 // Validators
 import { type SignUpBody, validateInput } from "@local/validators";
+import { createSignupProcessor } from "../steps/services/create_signup.processor.ts";
 
 // TODO: 단계별 실패 시 롤백 전략 추가
 // TODO: - 체인 전체, 부분 실패 시 에러 처리
@@ -61,50 +60,13 @@ const verifyOtpToken = parseRequestInput
   .then(createVerifyOtpStep(supabase), "create_verify_otp_step")
   .tap(storeAuthDataStep, "store_auth_data_step");
 
-// 3. 디바이스 세션 테이블 삽입
-const checkSignUpStatus = verifyOtpToken
-  // 3.1 사용자 id 조회 & 반환
+// 3. 회원 가입 처리
+const processSignUp = verifyOtpToken
   .then(createGetUserStep(supabase), "create_get_user_step")
-  .zipWith(
-    selectRequestBodyStep,
-    // 3.2 디바이스 세션 테이블 삽입을 위한 데이터 구성
-    (user, body) => ({
-      user_id: user.id,
-      device_id: body.device_id,
-    }),
-    "prepare_signup_status_check_data"
-  )
-  // 3.3 가입 상태 확인
-  .zipWith(
-    createCheckSignUpStatusStep(supabase),
-    (previousStep, currentStep) => {
-      return {
-        user_id: previousStep.user_id,
-        device_id: previousStep.device_id,
-        signUpStatus: currentStep,
-      };
-    },
-    "process_check_signup_status_step"
-  )
-  .zipWith(
-    selectRequestBodyStep,
-    (previousStep, currentStep) => {
-      return {
-        ...previousStep,
-        platform: currentStep.platform,
-      };
-    },
-    "prepare_signup_completion_data"
-  );
+  .then(createSignupProcessor(supabase), "create_signup_processor");
 
-// 3.3 device_sessions 레코드 생성
-const handleSignupCompletion = checkSignUpStatus.then(
-  createHandleSignUpCompletionStep(supabase),
-  "handle_signup_completion_step"
-);
-
-// 4. device_id 를 JWT claim 에 추가하고 공유 상태에 저장한다.
-const processTokenSigning = handleSignupCompletion
+// 4. JWT 토큰 재서명 - device_id, session_id 추가
+const processTokenSigning = processSignUp
   // 4.1 JWT 토큰 재서명을 위한 데이터 구성
   .zipWith(
     retrieveAuthDataStep,
