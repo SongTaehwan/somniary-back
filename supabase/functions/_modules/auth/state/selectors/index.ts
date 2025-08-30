@@ -33,18 +33,3 @@ export const State = Object.assign(BaseState, {
   setAuthData: setData<AuthTokens>(KEY_AUTH_DATA),
   getAuthData: getData<AuthTokens>(KEY_AUTH_DATA),
 });
-
-export const selectAuthData = <
-  Body,
-  Query,
-  State extends AuthState<Body, Query>
->(
-  ctx: Context<Body, Query, State>
-): AuthTokens => {
-  const body = State.getAuthData(ctx);
-
-  return {
-    access_token: body.access_token,
-    refresh_token: body.refresh_token,
-  };
-};

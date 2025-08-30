@@ -21,8 +21,9 @@ export type Database = {
           id: string
           last_seen: string
           platform: Database["public"]["Enums"]["device_platform"]
-          push_token: string
-          push_token_type: Database["public"]["Enums"]["push_vendor"]
+          push_token: string | null
+          push_token_type: Database["public"]["Enums"]["push_vendor"] | null
+          session_id: string
           updated_at: string
           user_id: string
         }
@@ -32,8 +33,9 @@ export type Database = {
           id?: string
           last_seen?: string
           platform: Database["public"]["Enums"]["device_platform"]
-          push_token: string
-          push_token_type: Database["public"]["Enums"]["push_vendor"]
+          push_token?: string | null
+          push_token_type?: Database["public"]["Enums"]["push_vendor"] | null
+          session_id: string
           updated_at?: string
           user_id?: string
         }
@@ -43,8 +45,9 @@ export type Database = {
           id?: string
           last_seen?: string
           platform?: Database["public"]["Enums"]["device_platform"]
-          push_token?: string
-          push_token_type?: Database["public"]["Enums"]["push_vendor"]
+          push_token?: string | null
+          push_token_type?: Database["public"]["Enums"]["push_vendor"] | null
+          session_id?: string
           updated_at?: string
           user_id?: string
         }

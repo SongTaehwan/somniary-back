@@ -9,7 +9,7 @@ import { compose } from "@shared/core/compose.ts";
 import { type SignUpBody } from "@local/validators";
 
 // Auth
-import { selectAuthData } from "@auth/state/selectors/index.ts";
+import { retrieveAuthDataStep } from "@auth/steps/rules/retrieve_auth_data.step.ts";
 
 // Chains
 import { signUpChain } from "@local/usecases";
@@ -20,7 +20,7 @@ Deno.serve(
   compose<SignUpBody, unknown, AuthState<SignUpBody>>(
     [methodGuard(["POST"]), signUpChain.toMiddleware()],
     (ctx) => {
-      const { access_token, refresh_token } = selectAuthData(ctx);
+      const { access_token, refresh_token } = retrieveAuthDataStep(ctx);
 
       return HttpResponse.message(200, {
         access_token,

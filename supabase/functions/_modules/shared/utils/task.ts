@@ -72,15 +72,18 @@ export async function task<T>(
     };
   } catch (err) {
     const error = toError(err);
+    const errorWithCause = Object.assign(error, {
+      cause: error.cause ?? labelForError,
+    });
 
     if (throwError) {
-      throw Object.assign(error, { cause: error.cause ?? labelForError });
+      throw errorWithCause;
     }
 
     return {
       success: false,
       failed: true,
-      error: Object.assign(error, { cause: error.cause ?? labelForError }),
+      error: errorWithCause,
     };
   }
 }
