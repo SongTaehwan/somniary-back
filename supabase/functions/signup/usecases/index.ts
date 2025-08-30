@@ -2,7 +2,7 @@
 import { chain } from "@shared/core/chain.ts";
 import { supabase } from "@shared/infra/supabase.ts";
 import { AppConfig } from "@shared/utils/config.ts";
-import { selectInputBody } from "@shared/state/selectors/index.ts";
+import { selectRequestBodyStep } from "@shared/state/selectors/index.ts";
 import { parseInputStep } from "@shared/adapters/http/steps/parse_input.step.ts";
 
 // Types
@@ -55,7 +55,7 @@ const parseRequestInput = chain<
 
 // 2. 사용자 인증 처리 및 토큰 발급
 const verifyOtpToken = parseRequestInput
-  .then(selectInputBody, "select_input_body_step")
+  .then(selectRequestBodyStep, "select_input_body_step")
   // INFO: 멱등키를 적용하면 1회성 토큰의 중복 요청 방지됨
   // - 이후 작업의 실패로 토큰 재사용 불가 시 클라이언트단에서 토큰 재발급 시도하도록 유도
   .then(createVerifyOtpStep(supabase), "create_verify_otp_step")
@@ -66,7 +66,7 @@ const checkSignUpStatus = verifyOtpToken
   // 3.1 사용자 id 조회 & 반환
   .then(createGetUserStep(supabase), "create_get_user_step")
   .zipWith(
-    selectInputBody,
+    selectRequestBodyStep,
     // 3.2 디바이스 세션 테이블 삽입을 위한 데이터 구성
     (user, body) => ({
       user_id: user.id,
@@ -87,7 +87,7 @@ const checkSignUpStatus = verifyOtpToken
     "process_check_signup_status_step"
   )
   .zipWith(
-    selectInputBody,
+    selectRequestBodyStep,
     (previousStep, currentStep) => {
       return {
         ...previousStep,

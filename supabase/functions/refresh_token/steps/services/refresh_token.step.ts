@@ -15,13 +15,13 @@ export const refreshTokenStep = (
   supabase: SupabaseClient
 ): Step<
   RefreshTokenBody,
-  { access_token: string; refresh_token: string; device_id: string },
+  { access_token: string; refresh_token: string },
   RefreshTokenQuery,
   unknown,
   AuthState<RefreshTokenBody, RefreshTokenQuery>
 > => {
   return async (ctx, input) => {
-    const { refresh_token, device_id } = input;
+    const { refresh_token } = input;
 
     const { data, error } = await supabase.auth.refreshSession({
       refresh_token,
@@ -38,7 +38,6 @@ export const refreshTokenStep = (
     }
 
     return {
-      device_id,
       access_token: data.session.access_token,
       refresh_token: data.session.refresh_token,
     };
