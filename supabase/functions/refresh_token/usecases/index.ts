@@ -41,7 +41,7 @@ export const refreshTokenChain = chain<
       access_token: previousStep.access_token,
       refresh_token: previousStep.refresh_token,
       device_id: currentStep.device_id,
-      session_id: crypto.randomUUID(),
+      device_session_id: crypto.randomUUID(),
     }),
     "prepare_resign_jwt_with_claims_data"
   )

@@ -22,7 +22,7 @@ export const createResignJwtWithClaimsStep = <
 ): Step<
   {
     device_id: string;
-    session_id: string;
+    device_session_id: string;
     access_token: string;
     refresh_token: string;
   },
@@ -33,7 +33,7 @@ export const createResignJwtWithClaimsStep = <
 > => {
   return async (
     ctx,
-    { device_id, session_id, access_token, refresh_token }
+    { device_id, device_session_id, access_token, refresh_token }
   ) => {
     // 1) 기존 access_token 검증
     const verifyTask = await task(dependency.verify(access_token), {
@@ -51,7 +51,7 @@ export const createResignJwtWithClaimsStep = <
 
     // 2) 새 토큰 발급 (유효기간은 기존과 동일하게 가져갈 수도 있고, 새로 설정 가능)
     const signTask = await task(
-      dependency.sign({ ...claims, device_id, session_id }),
+      dependency.sign({ ...claims, device_id, device_session_id }),
       {
         labelForError: "resignJwtWithDeviceIdStep_sign",
       }

@@ -72,7 +72,7 @@ const processTokenSigning = processSignUp
     retrieveAuthDataStep,
     (previousStep, currentStep) => {
       return {
-        session_id: previousStep.deviceSession.session_id,
+        device_session_id: previousStep.deviceSession.session_id,
         device_id: previousStep.deviceSession.device_id,
         access_token: currentStep.access_token,
         refresh_token: currentStep.refresh_token,
