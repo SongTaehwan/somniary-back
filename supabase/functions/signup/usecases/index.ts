@@ -3,7 +3,6 @@ import { chain } from "@shared/core/chain.ts";
 import { supabase } from "@shared/infra/supabase.ts";
 import { AppConfig } from "@shared/utils/config.ts";
 import { selectRequestBodyStep } from "@shared/adapters/http/steps/select_request_input.step.ts";
-import { parseInputStep } from "@shared/adapters/http/steps/parse_input.step.ts";
 
 // Types
 import { type Input } from "@shared/types/state.types.ts";
@@ -21,7 +20,7 @@ import { retrieveAuthDataStep } from "@auth/steps/rules/retrieve_auth_data.step.
 import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
 // Validators
-import { type SignUpBody, validateInput } from "@local/validators";
+import { type SignUpBody, validateRequestInputStep } from "@local/validators";
 import { createSignupProcessor } from "../steps/services/create_signup.processor.ts";
 
 // TODO: 단계별 실패 시 롤백 전략 추가
@@ -39,15 +38,10 @@ const parseRequestInput = chain<
   unknown,
   AuthState<SignUpBody>,
   Input<SignUpBody>
->(
-  parseInputStep({
-    bodyParser: validateInput,
-  }),
-  {
-    debugMode: AppConfig.isDevelopment,
-    debugLabel: "signup_chain",
-  }
-)
+>(validateRequestInputStep, {
+  debugMode: AppConfig.isDevelopment,
+  debugLabel: "signup_chain",
+})
   // 공유 상태에 body 정보 저장
   .tap(storeInput, "store_input_step");
 // TODO: 멱등키를 적용해 중복 요청 방지

@@ -2,6 +2,7 @@ import { z } from "npm:zod";
 
 // Shared
 import { createValidator } from "@shared/utils/validator.ts";
+import { parseInputStep } from "@shared/steps/parser";
 
 const schema = z.object({
   device_id: z.string().nonempty(),
@@ -11,4 +12,7 @@ const schema = z.object({
 });
 
 export type SignUpBody = z.infer<typeof schema>;
-export const validateInput = createValidator(schema);
+
+export const validateRequestInputStep = parseInputStep({
+  bodyParser: createValidator(schema),
+});
