@@ -63,7 +63,7 @@ supabase/functions/
 - **Selector**: `State`에 대한 읽기 전용 접근자(검증·형변환 캡슐화)
 
   - 실패 시 예외를 통해 즉시 종료(Short-circuit)
-  - 예: `selectInputBody`, 토큰 해시/디바이스 ID 선택
+  - 예: `selectRequestBodyStep`, 토큰 해시/디바이스 ID 선택
 
 - **Step**: 체인에서 합성되는 순수 도메인 로직 유닛
 

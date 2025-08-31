@@ -1,10 +1,15 @@
-import { Middleware } from "../types/middleware.types.ts";
+// Types
+import { type Middleware } from "../types/middleware.types.ts";
+import { type Context } from "../types/context.types.ts";
+import { type RouteState } from "../types/state.types.ts";
+
+// Adapters
 import { HttpException } from "../adapters/http/format/exception.ts";
-import { Context } from "../types/context.types.ts";
 import { toError } from "../adapters/http/format/normalize.ts";
-import { RouteState } from "../types/state.types.ts";
-import { Selector } from "../state/selectors/selectors.types.ts";
+
+// Utils
 import { task, TaskResult } from "../utils/task.ts";
+import { maskSensitiveData } from "../utils/security.ts";
 
 // Variadic pipeline step: first(ctx) → step(prev, ctx) → ...
 export type Step<
@@ -30,6 +35,10 @@ export type SideEffect<
   Query = unknown,
   State extends RouteState<Body, Query> = RouteState<Body, Query>
 > = (ctx: Context<Body, Query, State>, value: Acc) => Promise<void> | void;
+
+export type Selector<R, T, Q, S extends RouteState<T, Q>> = (
+  ctx: Context<T, Q, S>
+) => Promise<R> | R;
 
 type ChainBuilderOptions = {
   debugMode: boolean;
@@ -83,11 +92,37 @@ export class ChainBuilder<
     );
   }
 
-  // 직전 단계와 다음 단계의 결과를 사용자가 직접 병합합니다.
-  merge<Next, R>(
+  // 지연 평가: Step 생성을 실행 시점까지 지연시켜 런타임 의존성 관리
+  lazyThen<Next>(
+    stepFactory: (
+      ctx: Context<Body, Query, State>,
+      input: Acc
+    ) => Step<Acc, Next, Body, Query, State>,
+    label: string = "Anonymous Lazy Step"
+  ): ChainBuilder<Body, Query, State, Next> {
+    return new ChainBuilder(
+      async (ctx) => {
+        const previousStep = await task(this.run(ctx), {
+          labelForError: label,
+          throwError: true,
+        });
+        this.logTask(previousStep, label);
+
+        // 실행 시점에 Step 생성 및 실행
+        const dynamicStep = stepFactory(ctx, previousStep.value);
+        return dynamicStep(ctx, previousStep.value);
+      },
+      {
+        debugMode: this.debugMode,
+        debugLabel: this.debugLabel,
+      }
+    );
+  }
+
+  zipWith<Next, R>(
     nextStep: Step<Acc, Next, Body, Query, State>,
-    mergeFn: (previousStep: Acc, nextStepResult: Next) => R | Promise<R>,
-    label: string = "Anonymous Merge Step"
+    combiner: (previousStep: Acc, nextStepResult: Next) => R | Promise<R>,
+    label: string = "Anonymous Zip With Step"
   ): ChainBuilder<Body, Query, State, R> {
     return new ChainBuilder(
       async (ctx) => {
@@ -103,41 +138,7 @@ export class ChainBuilder<
         });
 
         this.logTask(nextStepResult, label);
-
-        return mergeFn(previousStep.value, nextStepResult.value);
-      },
-      {
-        debugMode: this.debugMode,
-        debugLabel: this.debugLabel,
-      }
-    );
-  }
-
-  // 직전 단계와 다음 단계의 결과를 그대로 병합합니다.
-  mergeWith<Next>(
-    nextStep: Step<Acc, Next, Body, Query, State>,
-    label: string = "Anonymous Merge With Step"
-  ): ChainBuilder<Body, Query, State, Acc & Next> {
-    return new ChainBuilder(
-      async (ctx) => {
-        const previousStep = await task(this.run(ctx), {
-          labelForError: label,
-          throwError: true,
-        });
-
-        this.logTask(previousStep, label);
-
-        const nextStepResult = await task(nextStep(ctx, previousStep.value), {
-          labelForError: label,
-          throwError: true,
-        });
-
-        this.logTask(nextStepResult, label);
-
-        return {
-          ...previousStep.value,
-          ...nextStepResult.value,
-        };
+        return combiner(previousStep.value, nextStepResult.value);
       },
       {
         debugMode: this.debugMode,
@@ -219,6 +220,36 @@ export class ChainBuilder<
     );
   }
 
+  catch(
+    cleanUp: (
+      ctx: Context<Body, Query, State>,
+      error: Error
+    ) => Promise<void> | void,
+    label: string = "Anonymous Catch Step"
+  ): ChainBuilder<Body, Query, State, Acc> {
+    return new ChainBuilder(
+      async (ctx) => {
+        const result = await task(this.run(ctx), {
+          labelForError: label,
+        });
+
+        this.logTask(result, label);
+
+        if (result.success) {
+          return result.value;
+        }
+
+        // if failed, clean up
+        await cleanUp(ctx, result.error);
+        throw result.error;
+      },
+      {
+        debugMode: this.debugMode,
+        debugLabel: this.debugLabel,
+      }
+    );
+  }
+
   toMiddleware(): Middleware<Body, Query, State> {
     return async (ctx, next) => {
       try {
@@ -258,9 +289,11 @@ export class ChainBuilder<
     }
 
     if (taskResult.success) {
+      // 민감한 데이터를 마스킹하여 로깅
+      const maskedValue = this.maskLogData(taskResult.value);
       console.log(
         `[${this.debugLabel}_${label}] task success\n`,
-        JSON.stringify(taskResult.value, null, 4)
+        JSON.stringify(maskedValue, null, 4)
       );
     } else {
       console.log(
@@ -268,6 +301,20 @@ export class ChainBuilder<
         JSON.stringify(taskResult.error, null, 4)
       );
     }
+  }
+
+  // 로깅 시 민감한 데이터 마스킹
+  private maskLogData<T>(data: T): T {
+    if (typeof data !== "object" || data === null) {
+      return data;
+    }
+
+    // 객체나 배열인 경우 민감 정보 마스킹
+    if (Array.isArray(data)) {
+      return data.map((item) => this.maskLogData(item)) as T;
+    }
+
+    return maskSensitiveData(data as Record<string, unknown>) as T;
   }
 }
 

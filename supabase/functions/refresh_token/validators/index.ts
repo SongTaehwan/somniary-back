@@ -13,6 +13,6 @@ const bodySchema = z.object({
 export type RefreshTokenBody = z.infer<typeof bodySchema>;
 export type RefreshTokenQuery = unknown;
 
-export const validateStep = parseInputStep({
+export const validateRequestInputStep = parseInputStep({
   bodyParser: createValidator(bodySchema),
 });

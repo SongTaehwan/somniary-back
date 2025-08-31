@@ -13,20 +13,28 @@ import { type AuthTokens } from "../../state/index.ts";
 import { type RouteState } from "../../../shared/types/state.types.ts";
 import { type JwtClaims } from "../../types/index.ts";
 
-export const resignJwtWithDeviceIdStep = <
+export const createResignJwtWithClaimsStep = <
   Body,
   Query,
   State extends RouteState<Body, Query>
 >(
   dependency: JwtDependencies<JwtClaims>
 ): Step<
-  { device_id: string; access_token: string; refresh_token: string },
+  {
+    device_id: string;
+    device_session_id: string;
+    access_token: string;
+    refresh_token: string;
+  },
   AuthTokens,
   Body,
   Query,
   State
 > => {
-  return async (ctx, { device_id, access_token, refresh_token }) => {
+  return async (
+    ctx,
+    { device_id, device_session_id, access_token, refresh_token }
+  ) => {
     // 1) 기존 access_token 검증
     const verifyTask = await task(dependency.verify(access_token), {
       labelForError: "resignJwtWithDeviceIdStep_verify",
@@ -42,9 +50,12 @@ export const resignJwtWithDeviceIdStep = <
     const claims = verifyTask.value;
 
     // 2) 새 토큰 발급 (유효기간은 기존과 동일하게 가져갈 수도 있고, 새로 설정 가능)
-    const signTask = await task(dependency.sign({ ...claims, device_id }), {
-      labelForError: "resignJwtWithDeviceIdStep_sign",
-    });
+    const signTask = await task(
+      dependency.sign({ ...claims, device_id, device_session_id }),
+      {
+        labelForError: "resignJwtWithDeviceIdStep_sign",
+      }
+    );
 
     if (signTask.failed) {
       // 클라이언트 응답
