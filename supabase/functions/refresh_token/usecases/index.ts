@@ -1,6 +1,9 @@
 // Shared
 import { chain } from "@shared/core/chain.ts";
 import { supabase } from "@shared/infra/supabase.ts";
+import { storeRequestInputStep } from "@shared/adapters/http/steps/store_request_input.step.ts";
+import { AppConfig } from "@shared/utils/config.ts";
+import { selectRequestBodyStep } from "@shared/adapters/http/steps/select_request_input.step.ts";
 
 // Auth
 import { type AuthState } from "@auth/state/index.ts";
@@ -20,8 +23,6 @@ import {
 
 // State
 import { refreshTokenStep } from "@local/steps/services/refresh_token.step.ts";
-import { AppConfig } from "@shared/utils/config.ts";
-import { selectRequestBodyStep } from "@shared/adapters/http/steps/select_request_input.step.ts";
 
 export const refreshTokenChain = chain<
   RefreshTokenBody,
@@ -32,6 +33,7 @@ export const refreshTokenChain = chain<
   debugMode: AppConfig.isDevelopment,
   debugLabel: "refresh_token_chain",
 })
+  .tap(storeRequestInputStep, "store_input_step")
   .then(selectRequestBodyStep, "select_body_step")
   // TODO: device_id 검증 단계 필요
   .then(refreshTokenStep(supabase), "refresh_token_step")

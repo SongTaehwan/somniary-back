@@ -3,15 +3,7 @@ import { chain } from "@shared/core/chain.ts";
 import { supabase } from "@shared/infra/supabase.ts";
 import { AppConfig } from "@shared/utils/config.ts";
 import { selectRequestBodyStep } from "@shared/adapters/http/steps/select_request_input.step.ts";
-
-// Types
-import { type Input } from "@shared/types/state.types.ts";
-import { type AuthState } from "@auth/state/index.ts";
-
-// Steps
-import { createVerifyOtpStep } from "@local/steps/services/create_verify_otp.step.ts";
-import { storeInput } from "@local/steps/effects/store_input.effect.ts";
-import { createGetUserStep } from "@local/steps/services/create_get_user.step.ts";
+import { storeRequestInputStep } from "@shared/adapters/http/steps/store_request_input.step.ts";
 
 // Auth
 import { createResignJwtWithClaimsStep } from "@auth/steps/services/create_resign_jwt_with_claims.step.ts";
@@ -19,9 +11,17 @@ import { storeAuthDataStep } from "@auth/steps/rules/store_auth_data.step.ts";
 import { retrieveAuthDataStep } from "@auth/steps/rules/retrieve_auth_data.step.ts";
 import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
+// Types
+import { type Input } from "@shared/types/state.types.ts";
+import { type AuthState } from "@auth/state/index.ts";
+
+// Steps
+import { createVerifyOtpStep } from "@local/steps/services/create_verify_otp.step.ts";
+import { createGetUserStep } from "@local/steps/services/create_get_user.step.ts";
+
 // Validators
 import { type SignUpBody, validateRequestInputStep } from "@local/validators";
-import { createSignupProcessor } from "../steps/services/create_signup.processor.ts";
+import { createSignupProcessor } from "@local/steps/services/create_signup.processor.ts";
 
 // TODO: 단계별 실패 시 롤백 전략 추가
 // TODO: - 체인 전체, 부분 실패 시 에러 처리
@@ -43,7 +43,7 @@ const parseRequestInput = chain<
   debugLabel: "signup_chain",
 })
   // 공유 상태에 body 정보 저장
-  .tap(storeInput, "store_input_step");
+  .tap(storeRequestInputStep, "store_input_step");
 // TODO: 멱등키를 적용해 중복 요청 방지
 
 // 2. 사용자 인증 처리 및 토큰 발급
