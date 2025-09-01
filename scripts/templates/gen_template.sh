@@ -36,7 +36,7 @@ const querySchema = z.object({
 export type ${PASCAL_FUNC_NAME}Body = z.infer<typeof bodySchema>;
 export type ${PASCAL_FUNC_NAME}Query = z.infer<typeof querySchema>;
 
-export const validateStep = parseInputStep({
+export const validateRequestInputStep = parseInputStep({
   bodyParser: createValidator(bodySchema),
   queryParser: createValidator(querySchema),
 });
@@ -73,6 +73,7 @@ echo "🔨 State 생성 완료"
 cat <<EOF > $USECASE_DIR/index.ts
 // Shared
 import { chain } from "@shared/core/chain.ts";
+import { AppConfig } from "@shared/utils/config.ts";
 
 // Types
 import { type Input } from "@shared/types/state.types.ts";
@@ -81,19 +82,23 @@ import { type Input } from "@shared/types/state.types.ts";
 import { 
   type ${PASCAL_FUNC_NAME}Body, 
   type ${PASCAL_FUNC_NAME}Query, 
-  validateStep,
+  validateRequestInputStep,
 } from "@local/validators";
 
 // State
 import { type FunctionState } from "@local/state";
 
-export const usecase = chain<
+const usecase = chain<
   ${PASCAL_FUNC_NAME}Body,
   ${PASCAL_FUNC_NAME}Query,
   FunctionState<${PASCAL_FUNC_NAME}Body, ${PASCAL_FUNC_NAME}Query>,
   Input<${PASCAL_FUNC_NAME}Body, ${PASCAL_FUNC_NAME}Query>
->(validateStep);
+>(validateRequestInputStep, {
+  debugMode: AppConfig.isDevelopment,
+  debugLabel: "chain_name",
+});
 
+export const ${PASCAL_FUNC_NAME}Chain = usecase;
 EOF
 
 echo "🔨 Usecase 생성 완료"

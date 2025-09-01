@@ -10,7 +10,7 @@ fi
 CURRENT_DIR=$(pwd)
 
 mkdir -p $CURRENT_DIR/supabase/functions/$name/{state,steps,usecases,validators,adapters}
-mkdir -p $CURRENT_DIR/supabase/functions/$name/state/selectors
-mkdir -p $CURRENT_DIR/supabase/functions/$name/steps/{rules,services,effects}
+mkdir -p $CURRENT_DIR/supabase/functions/$name/state
+mkdir -p $CURRENT_DIR/supabase/functions/$name/steps/services
 
 echo "🔨 디렉토리 생성 완료"

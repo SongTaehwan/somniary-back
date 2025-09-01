@@ -17,13 +17,16 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 // Shared
 import { compose } from "@shared/core/compose.ts";
 import { methodGuard } from "@shared/adapters/http/middlewares/method_guard.middleware.ts";
-import { CONTENT_TYPES } from "@shared/adapters/http/format/constant.ts";
+import { HttpResponse } from "@shared/adapters/http/format/response.ts";
 
 // Validators
 import { type ${PASCAL_FUNC_NAME}Body, type ${PASCAL_FUNC_NAME}Query } from "@local/validators";
 
 // State
 import { type FunctionState } from "@local/state";
+
+// Chains
+import { ${PASCAL_FUNC_NAME}Chain } from "@local/usecases";
 
 Deno.serve(
   compose<
@@ -34,11 +37,10 @@ Deno.serve(
     [
       methodGuard(["POST"]),
       // add chain
+      ${PASCAL_FUNC_NAME}Chain.toMiddleware(),
     ],
     (ctx) => {
-      return new Response(JSON.stringify({ message: "hello world!" }), {
-        headers: { "Content-Type": CONTENT_TYPES.JSON },
-      });
+      return HttpResponse.message(200, { message: "success" });
     }
   )
 );
