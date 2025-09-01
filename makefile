@@ -25,8 +25,14 @@ dump:
 	supabase db dump --data-only -f supabase/dump-data.sql && make connect_db OPTION="-f supabase/dump-data.sql"
 
 # 리포트 DB 스키마 타입 생성
-get_db_type:
+get_db_types:
 	supabase gen types typescript --project-id pipoeqfnniyoknlkqpfm --schema public > database.types.ts
+
+get_local_db_types:
+	supabase gen types typescript --local --schema public > database.types.ts
+
+start_functions:
+	supabase functions serve --env-file .env.local --inspect
 
 scaffold_func:
 	./scripts/gen_func.sh $(FUNCTION_NAME)
