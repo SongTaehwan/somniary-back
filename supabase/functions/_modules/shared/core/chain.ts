@@ -177,7 +177,7 @@ export class ChainBuilder<
   // tap: 직전 단계의 반환값을 변경하지 않고 부수효과만 수행합니다.
   // 이후 단계의 입력은 여전히 이전 단계의 반환값(Acc)입니다.
   tap(
-    fn: SideEffect<Acc, Body, Query, State>,
+    fn: Step<Acc, unknown, Body, Query, State>,
     label: string = "Anonymous Tap Step"
   ): ChainBuilder<Body, Query, State, Acc> {
     return new ChainBuilder(
@@ -212,6 +212,42 @@ export class ChainBuilder<
         });
         this.logTask(result, label);
         return selector(ctx);
+      },
+      {
+        debugMode: this.debugMode,
+        debugLabel: this.debugLabel,
+      }
+    );
+  }
+
+  cast<Next>(
+    castFn: (value: Acc) => Next | Promise<Next>,
+    label: string = "Anonymous Cast Step"
+  ): ChainBuilder<Body, Query, State, NonNullable<Next>> {
+    return new ChainBuilder(
+      async (ctx) => {
+        const result = await task(this.run(ctx), {
+          labelForError: label,
+          throwError: true,
+        });
+        this.logTask(result, label);
+
+        const castedValue = await task(castFn(result.value), {
+          labelForError: `${label}_cast`,
+          throwError: true,
+        });
+
+        this.logTask(castedValue, `${label}_cast`);
+
+        // undefined 또는 null 체크로 타입 안전성 보장
+        if (castedValue.value === undefined || castedValue.value === null) {
+          throw new Error("Cast function returned undefined or null", {
+            cause: `${label}_cast`,
+          });
+        }
+
+        // 타입 가드를 통과했으므로 안전하게 non-null 타입으로 반환
+        return castedValue.value as NonNullable<Next>;
       },
       {
         debugMode: this.debugMode,
