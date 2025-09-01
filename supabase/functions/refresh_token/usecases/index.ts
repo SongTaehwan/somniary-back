@@ -7,7 +7,7 @@ import { selectRequestBodyStep } from "@shared/adapters/http/steps/select_reques
 
 // Auth
 import { type AuthState } from "@auth/state/index.ts";
-import { createJwtDependencies } from "@auth/utils/jwt.ts";
+import { jwtDependencies } from "@auth/utils/index.ts";
 import { createResignJwtWithClaimsStep } from "@auth/steps/services/create_resign_jwt_with_claims.step.ts";
 import { storeAuthDataStep } from "@auth/steps/rules/store_auth_data.step.ts";
 
@@ -48,10 +48,7 @@ export const refreshTokenChain = chain<
     "prepare_resign_jwt_with_claims_data"
   )
   .lazyThen(
-    (_ctx, _input) =>
-      createResignJwtWithClaimsStep(
-        createJwtDependencies(AppConfig.getJwtSecret())
-      ),
+    (_ctx, _input) => createResignJwtWithClaimsStep(jwtDependencies),
     "resign_jwt_with_claims_step"
   )
   .then(storeAuthDataStep, "store_auth_data_step");

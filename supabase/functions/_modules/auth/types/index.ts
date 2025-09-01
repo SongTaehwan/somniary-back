@@ -22,3 +22,8 @@ export interface JwtClaims extends JwtPayload {
   }>;
   ref?: string; // Only in anon/service role tokens
 }
+
+export interface JwtClaimsWithDeviceId extends JwtClaims {
+  device_id: string;
+  device_session_id: string;
+}
