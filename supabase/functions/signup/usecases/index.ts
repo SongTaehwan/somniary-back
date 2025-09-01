@@ -1,6 +1,6 @@
 // Shared
 import { chain } from "@shared/core/chain.ts";
-import { supabase } from "@shared/infra/supabase.ts";
+import { supabaseAuthClient, supabase } from "@shared/infra/supabase.ts";
 import { AppConfig } from "@shared/utils/config.ts";
 import { selectRequestBodyStep } from "@shared/adapters/http/steps/select_request_input.step.ts";
 import { storeRequestInputStep } from "@shared/adapters/http/steps/store_request_input.step.ts";
@@ -51,7 +51,8 @@ const verifyOtpToken = parseRequestInput
   .then(selectRequestBodyStep, "select_input_body_step")
   // INFO: 멱등키를 적용하면 1회성 토큰의 중복 요청 방지됨
   // - 이후 작업의 실패로 토큰 재사용 불가 시 클라이언트단에서 토큰 재발급 시도하도록 유도
-  .then(createVerifyOtpStep(supabase), "create_verify_otp_step")
+  // supabase.auth 메소드 호출 시 세션 정보가 유지되므로 인스턴스를 따로 생성하여 사용
+  .then(createVerifyOtpStep(supabaseAuthClient), "create_verify_otp_step")
   .tap(storeAuthDataStep, "store_auth_data_step");
 
 // 3. 회원 가입 처리
