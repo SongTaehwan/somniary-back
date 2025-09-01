@@ -4,7 +4,7 @@ import { supabase } from "@shared/infra/supabase.ts";
 import { AppConfig } from "@shared/utils/config.ts";
 
 // Auth
-import { jwtDependencies } from "@auth/utils/index.ts";
+import { createJwtDependencies } from "@auth/utils/jwt.ts";
 import { createVerifyAccessTokenStep } from "@auth/steps/services/create_verify_access_token.step.ts";
 
 // Types
@@ -32,7 +32,10 @@ export const signOutChain = chain<
 })
   .tap(expireTokenStep(supabase), "expire_token_step")
   .lazyThen(
-    (_ctx, _input) => createVerifyAccessTokenStep(jwtDependencies),
+    (_ctx, _input) =>
+      createVerifyAccessTokenStep(
+        createJwtDependencies(AppConfig.getJwtSecret())
+      ),
     "create_verify_access_token_step"
   )
   .map((claim) => ({

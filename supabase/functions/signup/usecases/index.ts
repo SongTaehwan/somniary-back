@@ -9,7 +9,7 @@ import { storeRequestInputStep } from "@shared/adapters/http/steps/store_request
 import { createResignJwtWithClaimsStep } from "@auth/steps/services/create_resign_jwt_with_claims.step.ts";
 import { storeAuthDataStep } from "@auth/steps/rules/store_auth_data.step.ts";
 import { retrieveAuthDataStep } from "@auth/steps/rules/retrieve_auth_data.step.ts";
-import { jwtDependencies } from "@auth/utils/index.ts";
+import { createJwtDependencies } from "@auth/utils/jwt.ts";
 
 // Types
 import { type Input } from "@shared/types/state.types.ts";
@@ -76,7 +76,10 @@ const processTokenSigning = processSignUp
     "prepare_token_signing_data"
   )
   .lazyThen(
-    (_ctx, _input) => createResignJwtWithClaimsStep(jwtDependencies),
+    (_ctx, _input) =>
+      createResignJwtWithClaimsStep(
+        createJwtDependencies(AppConfig.getJwtSecret())
+      ),
     "process_token_signing"
   )
   // 4.2 엑세스 토큰 & 리프레시 토큰 저장 및 반환
