@@ -6,8 +6,8 @@ import { parseInputStep } from "@shared/steps/parser";
 
 // HTTP 요청 body 검증 함수 정의
 const bodySchema = z.object({
-  refresh_token: z.string().nonempty(),
-  device_id: z.string().nonempty(),
+  refresh_token: z.string().nonempty().min(12),
+  device_id: z.uuid(),
 });
 
 export type RefreshTokenBody = z.infer<typeof bodySchema>;

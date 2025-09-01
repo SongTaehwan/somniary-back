@@ -2,27 +2,23 @@ import { Step } from "@shared/core/chain.ts";
 import { SupabaseClient } from "@shared/infra/supabase.ts";
 import { HttpException } from "@shared/adapters/http/format/exception.ts";
 
-// Validators
-import {
-  type RefreshTokenBody,
-  type RefreshTokenQuery,
-} from "@local/validators";
-
 // Auth
-import { AuthState } from "@auth/state/index.ts";
+import { RouteState } from "@shared/types/state.types.ts";
 
-export const refreshTokenStep = (
+export const createRefreshTokenStep = <
+  Body,
+  Query,
+  State extends RouteState<Body, Query>
+>(
   supabase: SupabaseClient
 ): Step<
-  RefreshTokenBody,
+  { refresh_token: string },
   { access_token: string; refresh_token: string },
-  RefreshTokenQuery,
-  unknown,
-  AuthState<RefreshTokenBody, RefreshTokenQuery>
+  Body,
+  Query,
+  State
 > => {
-  return async (ctx, input) => {
-    const { refresh_token } = input;
-
+  return async (ctx, { refresh_token }) => {
     const { data, error } = await supabase.auth.refreshSession({
       refresh_token,
     });
