@@ -36,4 +36,9 @@ start_functions:
 
 scaffold_func:
 	./scripts/gen_func.sh $(FUNCTION_NAME)
+check_func:
+	cd supabase/functions/signup && deno check . && cd ../../..
+	cd supabase/functions/signout && deno check . && cd ../../..
+	cd supabase/functions/refresh_token && deno check . && cd ../../..
+	
 	
