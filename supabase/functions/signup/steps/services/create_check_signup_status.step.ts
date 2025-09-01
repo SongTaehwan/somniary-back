@@ -7,7 +7,7 @@ type DeviceSession = {
   id: string;
   created_at: string;
   platform: "ios" | "android" | "web";
-  last_seen: string;
+  last_sign_in_at: string;
   device_id: string;
 };
 
@@ -94,7 +94,7 @@ export function createCheckSignUpStatusStep<
       const { data: deviceSessions, error: deviceSessionsError } =
         await dependency
           .from("device_sessions")
-          .select("id, created_at, platform, last_seen, device_id")
+          .select("id, created_at, platform, last_sign_in_at, device_id")
           .eq("user_id", user_id)
           .order("created_at", { ascending: false });
 

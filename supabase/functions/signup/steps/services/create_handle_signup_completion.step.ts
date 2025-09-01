@@ -115,7 +115,7 @@ const updateExistingDeviceSession = async (
   const { data: deviceSession, error } = await dependency
     .from("device_sessions")
     .update({
-      last_seen: timestamp,
+      last_sign_in_at: timestamp,
       updated_at: timestamp,
     })
     .eq("id", deviceSessionId)
@@ -141,6 +141,7 @@ const createNewDeviceSession = async (
       device_id,
       user_id,
       platform,
+      push_token_type: platform === "ios" ? "apns" : "fcm",
       session_id: crypto.randomUUID(),
     })
     .select()

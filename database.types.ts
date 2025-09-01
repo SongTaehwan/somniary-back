@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
-  }
   public: {
     Tables: {
       device_sessions: {
@@ -19,10 +14,10 @@ export type Database = {
           created_at: string
           device_id: string
           id: string
-          last_seen: string
+          last_sign_in_at: string
           platform: Database["public"]["Enums"]["device_platform"]
           push_token: string | null
-          push_token_type: Database["public"]["Enums"]["push_vendor"] | null
+          push_token_type: Database["public"]["Enums"]["push_vendor"]
           session_id: string
           updated_at: string
           user_id: string
@@ -31,10 +26,10 @@ export type Database = {
           created_at?: string
           device_id: string
           id?: string
-          last_seen?: string
-          platform: Database["public"]["Enums"]["device_platform"]
+          last_sign_in_at?: string
+          platform?: Database["public"]["Enums"]["device_platform"]
           push_token?: string | null
-          push_token_type?: Database["public"]["Enums"]["push_vendor"] | null
+          push_token_type?: Database["public"]["Enums"]["push_vendor"]
           session_id: string
           updated_at?: string
           user_id?: string
@@ -43,10 +38,10 @@ export type Database = {
           created_at?: string
           device_id?: string
           id?: string
-          last_seen?: string
+          last_sign_in_at?: string
           platform?: Database["public"]["Enums"]["device_platform"]
           push_token?: string | null
-          push_token_type?: Database["public"]["Enums"]["push_vendor"] | null
+          push_token_type?: Database["public"]["Enums"]["push_vendor"]
           session_id?: string
           updated_at?: string
           user_id?: string
@@ -76,30 +71,6 @@ export type Database = {
           id?: string
           title?: string
           updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      notifications: {
-        Row: {
-          created_at: string
-          id: string
-          token: string
-          type: Database["public"]["Enums"]["push_vendor"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          token?: string
-          type?: Database["public"]["Enums"]["push_vendor"]
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          token?: string
-          type?: Database["public"]["Enums"]["push_vendor"]
           user_id?: string
         }
         Relationships: []
@@ -270,3 +241,4 @@ export const Constants = {
     },
   },
 } as const
+
