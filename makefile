@@ -26,14 +26,17 @@ dump:
 
 # 리포트 DB 스키마 타입 생성
 get_db_types:
-	supabase gen types typescript --project-id pipoeqfnniyoknlkqpfm --schema public > database.types.ts
+	supabase gen types typescript --project-id pipoeqfnniyoknlkqpfm --schema public > ./supabase/functions/_modules/shared/infra/database.types.ts
 
 get_local_db_types:
-	supabase gen types typescript --local --schema public > database.types.ts
+	supabase gen types typescript --local --schema public > ./supabase/functions/_modules/shared/infra/database.types.ts
 
-start_functions:
+start_functions--inspect:
 	supabase functions serve --env-file .env.local --inspect
 
+start_functions:
+	supabase functions serve --env-file .env.local
+	
 scaffold_func:
 	./scripts/gen_func.sh $(FUNCTION_NAME)
 check_func:
