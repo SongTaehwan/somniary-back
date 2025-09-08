@@ -78,6 +78,8 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email: string
+          email_verified: boolean
           id: string
           name: string
           updated_at: string
@@ -85,6 +87,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email?: string
+          email_verified?: boolean
           id?: string
           name?: string
           updated_at?: string
@@ -92,6 +96,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email?: string
+          email_verified?: boolean
           id?: string
           name?: string
           updated_at?: string
@@ -104,7 +110,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_active_device_session: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       device_platform: "ios" | "android" | "web"
